@@ -1,0 +1,238 @@
+/* src/SignUp/styles.css */
+:root {
+  --primary: #2C3E50;
+  --secondary: #16A085;
+  --accent: #E67E22;
+  --background: #F9F9F9;
+  --text-primary: #2D3436;
+  --text-muted: #7F8C8D;
+  --success: #27AE60;
+  --error: #C0392B;
+  --info: #3498DB;
+}
+
+.signup-container {
+  display: flex;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+}
+
+.sidebar {
+  width: 380px;
+  background: white;
+  padding: 40px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 60px;
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  flex: 1;
+}
+
+.step {
+  display: flex;
+  gap: 15px;
+  align-items: flex-start;
+}
+
+.step-indicator {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ECF0F1;
+  color: var(--text-muted);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.step.active .step-indicator {
+  background: var(--primary);
+  color: white;
+}
+
+.step.completed .step-indicator {
+  background: var(--secondary);
+  color: white;
+}
+
+.step-content h4 {
+  margin: 0 0 5px;
+  color: var(--text-primary);
+  font-size: 16px;
+}
+
+.step.active h4 {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.step-content p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.footer {
+  margin-top: auto;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.form-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--background);
+  padding: 40px;
+}
+
+.form-card {
+  width: 100%;
+  max-width: 480px;
+  background: white;
+  border-radius: 12px;
+  padding: 40px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+h2 {
+  color: var(--primary);
+  margin: 0 0 10px;
+  font-size: 28px;
+  text-align: center;
+}
+
+.subtitle {
+  color: var(--text-muted);
+  margin: 0 0 30px;
+  font-size: 16px;
+  text-align: center;
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 14px;
+}
+
+input, select {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border 0.3s;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--info);
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+.error {
+  color: var(--error);
+}
+
+.btn-continue {
+  width: 100%;
+  padding: 16px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background 0.3s;
+}
+
+.btn-continue.active {
+  background: var(--secondary);
+}
+
+.btn-continue.active:hover {
+  background: #138a70;
+}
+
+.btn-continue.disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.verification-input {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  margin: 30px 0 20px;
+}
+
+.verification-input input {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 600;
+  padding: 12px;
+}
+
+.resend-link {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 14px;
+  margin: 10px 0 30px;
+}
+
+.resend-link button {
+  background: none;
+  border: none;
+  color: var(--info);
+  cursor: pointer;
+  padding: 0;
+}
+
+.navigation-links {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 25px;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0;
+}
+
+.link-btn a {
+  color: inherit;
+  text-decoration: none;
+  font-size: inherit;
+  font-family: inherit;
+}
+
+
+.link-btn:hover {
+  color: var(--info);
+}
