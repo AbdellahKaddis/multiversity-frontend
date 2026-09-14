@@ -11,7 +11,9 @@ const authApi = {
         }catch(error)
         {
             if(error.message === "Failed to fetch")
-                throw new Error("Oops! We're having trouble connecting to the server. Please try again later.")
+                throw new Error("Oops! We're having trouble connecting to the server. Please try again later.");
+            else
+                throw new Error(error.message)
         }
     },
     sendVerificationCode:async(email) => {
@@ -118,6 +120,7 @@ const authApi = {
                     email
                 })
             });
+            return { status : response.status }
         }catch(error){
             if(error.message === "Failed to fetch")
                 throw new Error("Oops! We're having trouble connecting to the server. Please try again later.");
@@ -150,6 +153,52 @@ const authApi = {
                 throw new Error(error.message)
         }
     },
+    registerFacultyDean:async({firstName, lastName, email}) => {
+            try{
+                const response = await fetch(`${baseUrl}auth/register/faculty-dean`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    firstName,
+                    lastName,
+                    email,
+                })
+            })
+            const data = await response.json();
+            return {data, status:response.status};
+            }catch(error)
+        {
+            if(error.message === "Failed to fetch")
+                throw new Error("Oops! We're having trouble connecting to the server. Please try again later.");
+            else
+                throw new Error(error.message)
+        }
+    },
+       deactivateUser:async(userId) => {
+        
+            try{
+                const response = await fetch(`${baseUrl}auth/users/${userId}/deactivate`,
+            {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const data = await response.json();
+
+            return { data , status : response.status }
+            }catch(error)
+        {
+            if(error.message === "Failed to fetch")
+                throw new Error("Oops! We're having trouble connecting to the server. Please try again later.");
+            else
+                throw new Error(error.message)
+        }
+    }
     
 
 };

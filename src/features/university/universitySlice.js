@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
     university : null,
+    faculties: null,
 };
 const universitySlice = createSlice({
   name: "university",
@@ -11,9 +12,12 @@ const universitySlice = createSlice({
     },
     remove: (state) => {
       state.university = null;
+    },
+    setFaculties:(state, action)=>{
+      state.faculties = action.payload;
     }
   }
 });
 
-export const { set, remove} = universitySlice.actions;
+export const { set, remove, setFaculties} = universitySlice.actions;
 export default universitySlice.reducer;

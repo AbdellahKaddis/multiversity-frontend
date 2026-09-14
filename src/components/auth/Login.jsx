@@ -24,7 +24,7 @@ const Login = () => {
       const {data, status} = await authApi.login(credentials);
 
       if(status === 401){
-        setError('Invalid credentials. Please try again.');
+        setError(data.message);
       }
 
       if(status === 200){
@@ -42,7 +42,19 @@ console.log(decoded);
           accessToken: data.token
         }))
 
-        navigate('/university-admin-dashboard');
+        switch(decoded.role){
+          case "UniversityAdmin":
+            navigate('/university-admin-dashboard');
+            break;
+          case "Dean":
+            navigate('/faculty-dean-dashboard');
+            break;
+          
+          case "Professor":
+            navigate('/professor-dashboard');
+            break;
+        }
+
       }
     } catch (error) {
       setError(error.message)

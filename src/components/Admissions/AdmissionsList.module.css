@@ -1,0 +1,256 @@
+/* Cards Grid */
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 24px;
+  padding: 8px;
+   /* align-items: start;   */
+}
+
+/* Card — floating */
+.admissionCard {
+  background: #FFFFFF;
+  border-radius: 14px;
+  border: 1px solid #ECEFF1;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.08),
+    0 10px 24px rgba(0, 0, 0, 0.16),
+    0 20px 48px rgba(0, 0, 0, 0.10);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admissionCard:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.10),
+    0 16px 36px rgba(0, 0, 0, 0.22),
+    0 28px 60px rgba(0, 0, 0, 0.14);
+}
+
+/* Card Header */
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.cardTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2C3E50;
+  margin: 0 0 4px 0;
+}
+
+.cardSubtitle {
+  font-size: 14px;
+  color: #7F8C8D;
+  margin: 0;
+}
+
+.yearBadge {
+  background-color: #EBF5FB;
+  color: #2C3E50;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Dates */
+.cardDates {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #2C3E50;
+}
+
+.dateSeparator {
+  color: #7F8C8D;
+}
+
+/* Process (text description) */
+.cardProcess {
+  background: #F9F9F9;
+  border-left: 3px solid #16A085;
+  padding: 12px 14px;
+  border-radius: 6px;
+}
+
+.processLabel {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #16A085;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.processText {
+  margin: 0;
+  font-size: 14px;
+  color: #2C3E50;
+  line-height: 1.4;
+}
+
+/* Requirements */
+.requirements {
+  border-top: 1px solid #E0E0E0;
+  padding-top: 12px;
+}
+
+.requirementsSummary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  color: #3498DB;
+  list-style: none;
+}
+
+.requirementsSummary::-webkit-details-marker {
+  display: none;
+}
+
+.requirementsSummary::before {
+  content: "▸ ";
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.requirements[open] .requirementsSummary::before {
+  transform: rotate(90deg);
+}
+
+.requirementsList {
+  list-style: none;
+  padding: 12px 0 0 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.requirementItem {
+  font-size: 14px;
+  color: #2C3E50;
+  padding-left: 16px;
+  position: relative;
+}
+
+.requirementItem::before {
+  content: "•";
+  color: #16A085;
+  position: absolute;
+  left: 0;
+  font-weight: 700;
+}
+
+/* Action Buttons */
+.actionButtons {
+  display: flex;
+  gap: 8px;
+  border-top: 1px solid #F0F0F0;
+  padding-top: 12px;
+  margin-top: auto;
+}
+
+.editButton,
+.deleteButton {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.editButton {
+  background-color: #EBF5FB;
+  color: #3498DB;
+}
+
+.editButton:hover {
+  background-color: #3498DB;
+  color: white;
+}
+
+.deleteButton {
+  background-color: #FDEDEC;
+  color: #C0392B;
+}
+
+.deleteButton:hover {
+  background-color: #C0392B;
+  color: white;
+}
+
+/* Header */
+.header {
+  margin-bottom: 32px;
+}
+
+.headerMain {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.pageTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: #2C3E50;
+  margin: 0;
+}
+
+.primaryButton {
+  background-color: #16A085;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.primaryButton:hover {
+  background-color: #138D75;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(22, 160, 133, 0.3);
+}
+
+/* Empty State */
+.emptyState {
+  text-align: center;
+  padding: 60px 20px;
+  color: #7F8C8D;
+  grid-column: 1 / -1;
+}
+
+.emptyIcon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.emptyState h3 {
+  color: #2C3E50;
+  margin-bottom: 8px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .cardsGrid {
+    grid-template-columns: 1fr;
+  }
+}

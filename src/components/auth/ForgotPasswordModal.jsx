@@ -11,8 +11,9 @@ const ForgotPasswordModal = ({ onClose }) => {
   
   const sendForgotPasswordEmail = async() => {
     try{
-      await authApi.forgotPassword(email);
-      return true;
+      const { status } = await authApi.forgotPassword(email);
+      if(status === 200) return true;
+      else setError("Something went wrong. We couldn't process your password reset request. Please try again later.")
     }catch(error){
       setError(error.message);
       return false;
