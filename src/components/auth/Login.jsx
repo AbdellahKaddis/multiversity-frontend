@@ -3,12 +3,12 @@ import { useState } from 'react';
 import LoginForm from './LoginForm';
 import LoginSideBar from './LoginSideBar';
 import ForgotPasswordModal from './ForgotPasswordModal';
-import "./login.css";
 import authApi from '../../api/authApi';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import { useDispatch } from 'react-redux';
 import { loginSuccess } from '../../features/auth/authSlice';
+import styles from './login.module.css';
 
 const Login = () => {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -16,23 +16,24 @@ const Login = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
   const handleLogin = async (credentials) => {
     setLoading(true);
     setError('');
-    
-    try {
-      const {data, status} = await authApi.login(credentials);
 
-      if(status === 401){
+    try {
+      const { data, status } = await authApi.login(credentials);
+
+      if (status === 401) {
         setError(data.message);
       }
 
-      if(status === 200){
+      if (status === 200) {
         localStorage.setItem("token", data.token);
-        
 
-const decoded = jwtDecode(data.token);
-console.log(decoded);
+        const decoded = jwtDecode(data.token);
+        console.log(decoded);
+
         dispatch(loginSuccess({
           user: {
             id: decoded.sub,
@@ -40,45 +41,48 @@ console.log(decoded);
             role: decoded.role
           },
           accessToken: data.token
-        }))
+        }));
 
-        switch(decoded.role){
+        switch (decoded.role) {
           case "UniversityAdmin":
             navigate('/university-admin-dashboard');
             break;
           case "Dean":
             navigate('/faculty-dean-dashboard');
             break;
-          
           case "Professor":
             navigate('/professor-dashboard');
             break;
+          case "Applicant":
+            navigate('/student/applications');
+            break;
+          case "Student":
+            navigate('/student/applications');
         }
-
       }
     } catch (error) {
-      setError(error.message)
+      setError(error.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="login-container">
+    <div className={styles.loginContainer}>
       {/* <LoginSideBar /> */}
-      
-      <div className="form-container">
-        <LoginForm 
-          onSubmit={handleLogin} 
+
+      <div className={styles.formContainer}>
+        <LoginForm
+          onSubmit={handleLogin}
           onForgotPassword={() => setShowForgotPassword(true)}
           loading={loading}
           error={error}
         />
       </div>
-      
+
       {showForgotPassword && (
-        <ForgotPasswordModal 
-          onClose={() => setShowForgotPassword(false)} 
+        <ForgotPasswordModal
+          onClose={() => setShowForgotPassword(false)}
         />
       )}
     </div>

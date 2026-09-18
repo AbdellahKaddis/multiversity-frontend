@@ -1,7 +1,8 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-
 // src/Login/LoginForm.jsx
+import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import styles from "./login.module.css";
+
 const LoginForm = ({ onSubmit, onForgotPassword, loading, error }) => {
   const [credentials, setCredentials] = useState({
     email: '',
@@ -9,9 +10,9 @@ const LoginForm = ({ onSubmit, onForgotPassword, loading, error }) => {
     rememberMe: false
   });
 
-  const isValid = credentials.email && 
-                 credentials.password.length >= 8 &&
-                 /^\S+@\S+\.\S+$/.test(credentials.email);
+  const isValid = credentials.email &&
+                  credentials.password.length >= 8 &&
+                  /^\S+@\S+\.\S+$/.test(credentials.email);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -28,24 +29,26 @@ const LoginForm = ({ onSubmit, onForgotPassword, loading, error }) => {
     }
   };
 
+  const loaction = useLocation()
+
   return (
-    <div className="form-card">
-      <div className="header">
+    <div className={styles.formCard}>
+      <div className={styles.header}>
         <h2>Welcome back</h2>
-        <p className="subtitle">Sign in to your account</p>
+        <p className={styles.subtitle}>Sign in to your account</p>
       </div>
-      
+
       {error && (
-        <div className="error-banner">
+        <div className={styles.errorBanner}>
           <svg viewBox="0 0 24 24">
             <path d="M11 15h2v2h-2v-2zm0-8h2v6h-2V7zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/>
           </svg>
           <span>{error}</span>
         </div>
       )}
-      
+
       <form onSubmit={handleSubmit}>
-        <div className="input-group">
+        <div className={styles.inputGroup}>
           <label>Email*</label>
           <input
             type="email"
@@ -56,13 +59,13 @@ const LoginForm = ({ onSubmit, onForgotPassword, loading, error }) => {
             autoComplete="username"
           />
         </div>
-        
-        <div className="input-group">
-          <div className="label-row">
+
+        <div className={styles.inputGroup}>
+          <div className={styles.labelRow}>
             <label>Password*</label>
-            <button 
+            <button
               type="button"
-              className="forgot-password"
+              className={styles.forgotPassword}
               onClick={onForgotPassword}
             >
               Forgot password?
@@ -77,8 +80,8 @@ const LoginForm = ({ onSubmit, onForgotPassword, loading, error }) => {
             autoComplete="current-password"
           />
         </div>
-        
-        <div className="remember-me">
+
+        <div className={styles.rememberMe}>
           <label>
             <input
               type="checkbox"
@@ -89,23 +92,23 @@ const LoginForm = ({ onSubmit, onForgotPassword, loading, error }) => {
             <span>Remember me</span>
           </label>
         </div>
-        
-        <button 
-          className={`btn-login ${isValid ? 'active' : 'disabled'}`}
+
+        <button
+          className={`${styles.btnLogin} ${isValid ? styles.active : styles.disabled}`}
           type="submit"
           disabled={!isValid || loading}
         >
           {loading ? (
-            <div className="spinner">
-              <div className="double-bounce1"></div>
-              <div className="double-bounce2"></div>
+            <div className={styles.spinner}>
+              <div className={styles.doubleBounce1}></div>
+              <div className={styles.doubleBounce2}></div>
             </div>
           ) : 'Sign In'}
         </button>
       </form>
-      
-      <div className="signup-prompt">
-        <p>Don't have an account? <Link to={'/signup'}>Sign up</Link></p>
+
+      <div className={styles.signupPrompt}>
+        <p>Don't have an account? <Link to={location.pathname === '/login' ? '/signup': '/signup/student'}>Sign up</Link></p>
       </div>
     </div>
   );

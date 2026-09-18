@@ -1,70 +1,69 @@
 import { useNavigate } from "react-router-dom";
 import authApi from "../../api/authApi";
 import universityApi from "../../api/universityApi";
-
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 import { useState } from "react";
+import styles from "./signup.module.css";
 
 const YourUniversityForm = ({ formData, handleChange, prevStep, isSubmit, setIsSubmit }) => {
-  const [errors,setErrors] = useState({});
-  const isValid = formData.universityName && formData.universityEmail && formData.universityType ;
+  const [errors, setErrors] = useState({});
+  const isValid = formData.universityName && formData.universityEmail && formData.universityType;
   const navigate = useNavigate();
-  const handleClick = async()=>{
+
+  const handleClick = async () => {
     setIsSubmit(true);
-    try{
-      if(isValid)
-        {
-          const {data, status} = await universityApi.checkForDuplicateValues({name:formData.universityName, email:formData.universityEmail});
-          if(status === 400)
-          {
-            setErrors({})
-            const newErrors = {};
-            if(data.Message.includes("Name"))
-              newErrors.name = "This name is already taken.";
-            if(data.Message.includes("Email"))
-              newErrors.email = "This email is already in use.";
-            setErrors(newErrors);
-          }
-          else if(status === 200)
-          {
-            const {firstName,lastName,password,email} = formData;
-            const {data, status} = await authApi.registerUniversityAmin({firstName,lastName,password,email});
-            
-            if(status === 201)
-            {
-              setErrors({})
-              formData.adminId = data.adminId;
-              
-              if(data.adminId)
-              {
-                const {universityName, universityType, universityEmail, adminId} = formData;
-                const {data,status} = await universityApi.createUniversity({universityName, universityType, universityEmail, adminId});
-                
-                if(status === 201)
-                {
-                  toast.success("🎉 Account created successfully. Redirecting...", {
-                    onClose: () => {
-                      navigate('/login');
-                    }
-                  });
-                }
+    try {
+      if (isValid) {
+        const { data, status } = await universityApi.checkForDuplicateValues({
+          name: formData.universityName,
+          email: formData.universityEmail,
+        });
+
+        if (status === 400) {
+          setErrors({});
+          const newErrors = {};
+          if (data.Message.includes("Name")) newErrors.name = "This name is already taken.";
+          if (data.Message.includes("Email")) newErrors.email = "This email is already in use.";
+          setErrors(newErrors);
+        } else if (status === 200) {
+          const { firstName, lastName, password, email } = formData;
+          const { data, status } = await authApi.registerUniversityAmin({
+            firstName, lastName, password, email,
+          });
+
+          if (status === 201) {
+            setErrors({});
+            formData.adminId = data.adminId;
+
+            if (data.adminId) {
+              const { universityName, universityType, universityEmail, adminId } = formData;
+              const { data, status } = await universityApi.createUniversity({
+                universityName, universityType, universityEmail, adminId,
+              });
+
+              if (status === 201) {
+                toast.success("🎉 Account created successfully. Redirecting...", {
+                  onClose: () => {
+                    navigate("/login");
+                  },
+                });
               }
             }
           }
         }
-  }catch(error)
-  {
-    setErrors(prev=>({...prev,netErr:error.message}));
-  }
-  setIsSubmit(false);
-};
+      }
+    } catch (error) {
+      setErrors((prev) => ({ ...prev, netErr: error.message }));
+    }
+    setIsSubmit(false);
+  };
 
   return (
-    <div className="form-card">
+    <div className={styles.formCard}>
       <h2>University information</h2>
-      <p className="subtitle">Provide university details</p>
-      
-      <div className="input-group">
+      <p className={styles.subtitle}>Provide university details</p>
+
+      <div className={styles.inputGroup}>
         <label>University Name*</label>
         <input
           type="text"
@@ -73,13 +72,13 @@ const YourUniversityForm = ({ formData, handleChange, prevStep, isSubmit, setIsS
           onChange={handleChange}
           placeholder="Enter university name"
         />
-        {errors.name && <p className="error">{errors.name}</p>}
+        {errors.name && <p className={styles.error}>{errors.name}</p>}
       </div>
-      
-      <div className="input-group">
+
+      <div className={styles.inputGroup}>
         <label>University Type*</label>
-        <select 
-          name="universityType" 
+        <select
+          name="universityType"
           value={formData.universityType}
           onChange={handleChange}
         >
@@ -87,8 +86,8 @@ const YourUniversityForm = ({ formData, handleChange, prevStep, isSubmit, setIsS
           <option value="private">Private</option>
         </select>
       </div>
-      
-      <div className="input-group">
+
+      <div className={styles.inputGroup}>
         <label>University Email*</label>
         <input
           type="email"
@@ -97,21 +96,23 @@ const YourUniversityForm = ({ formData, handleChange, prevStep, isSubmit, setIsS
           onChange={handleChange}
           placeholder="Enter university email"
         />
-        {errors.email && <p className="error">{errors.email}</p>}
-        
+        {errors.email && <p className={styles.error}>{errors.email}</p>}
       </div>
-      {errors.netErr && <p className="error">{errors.netErr}</p>}
 
-      <button 
+      {errors.netErr && <p className={styles.error}>{errors.netErr}</p>}
+
+      <button
         disabled={isSubmit || !isValid}
-        className={`btn-continue ${isValid ? 'active' : 'disabled'}`}
+        className={`${styles.btnContinue} ${isValid ? styles.active : styles.disabled}`}
         onClick={handleClick}
       >
         Complete Registration
       </button>
-      
-      <div className="navigation-links">
-        <button className="link-btn" onClick={prevStep}>Back</button>
+
+      <div className={styles.navigationLinks}>
+        <button className={styles.linkBtn} onClick={prevStep}>
+          Back
+        </button>
       </div>
     </div>
   );

@@ -1,14 +1,13 @@
 // src/SignUp/SignUp.jsx
 import { useState } from 'react';
-import SignUpSideBar from './SignUpSideBar';
-import YourDetailsForm from './YourDetailsForm';
+import SignUpSideBar from '../SignUpSideBar';
+import YourDetailsForm from '../YourDetailsForm';
 import YourPasswordForm from './YourPasswordForm';
-import VerifyYourEmailForm from './VerifyYourEmailForm';
-import YourUniversityForm from './YourUniversityForm';
+import VerifyYourEmailForm from '../VerifyYourEmailForm';
 import { ToastContainer } from 'react-toastify';
-import styles from './signup.module.css';
+import styles from '../signup.module.css';
 
-const SignUp = () => {
+const ApplicantSignUp = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState({
     firstName: '',
@@ -16,12 +15,8 @@ const SignUp = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    verificationCode: '',
-    universityName: '',
-    universityType: 'public',
-    universityEmail: '',
-    adminId: null,
-  });
+    verificationCode: ''
+});
   const [isSubmit, setIsSubmit] = useState(false);
 
   const nextStep = () => setCurrentStep((prev) => prev + 1);
@@ -65,19 +60,8 @@ const SignUp = () => {
         <YourPasswordForm
           formData={formData}
           handleChange={handleChange}
-          nextStep={nextStep}
           prevStep={prevStep}
-        />
-      ),
-    },
-    {
-      title: 'University info',
-      component: (
-        <YourUniversityForm
-          formData={formData}
-          handleChange={handleChange}
-          prevStep={prevStep}
-          isSubmit={isSubmit}
+        isSubmit={isSubmit}
           setIsSubmit={setIsSubmit}
         />
       ),
@@ -103,4 +87,4 @@ const SignUp = () => {
   );
 };
 
-export default SignUp;
+export default ApplicantSignUp;

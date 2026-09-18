@@ -31,6 +31,8 @@ import { toast } from "react-toastify";
 import { setFaculty } from "../features/faculty/facultySlice";
 import professorApi from "../api/professorApi";
 import { setProfessor } from "../features/Professor/professorSlice";
+import applicantApi from "../api/applicantApi";
+import {setApplicant} from "../features/applicant/applicantSlice";
 const AdminDashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [notifications, setNotifications] = useState(3);
@@ -85,7 +87,9 @@ const AdminDashboardLayout = () => {
         { name: "Professor Courses", icon: <FaChalkboardTeacher />,  link: "faculty-dean-dashboard/professorCourses", },
         { name: "Admissions", icon: <FaBook />,  link: "faculty-dean-dashboard/admissions", },
           { name: "Applications", icon: <FaBook />,  link: "faculty-dean-dashboard/applications", },
-        { name: "Students", icon: <FaUserGraduate /> },
+             { name: "Enrollments", icon: <FaBook />,  link: "faculty-dean-dashboard/enrollments", },
+          
+        { name: "Students", icon: <FaUserGraduate />,  link: "faculty-dean-dashboard/students",  },
 
         { name: "Schedule", icon: <FaCalendarAlt /> },
         { name: "Settings", icon: <FaCog /> },
@@ -94,58 +98,36 @@ const AdminDashboardLayout = () => {
     {
       role : "Professor",
       navItems : [
-         {
-          name: "Dashboard",
-          icon: <FaTachometerAlt />,
-          link: "/professor-dashboard",
-        },
+       
                  {
           name: "My Courses",
           icon: <FaBook />,
           link: "professor-dashboard/courses",
         },
-                 {
-          name: "My Classes",
-          icon: <FaTachometerAlt />,// not found
-          link: "/professor-dashboard/classes",
-        },
-                 {
-          name: "My Students",
-          icon: <PiStudentFill />,
-          link: "/professor-dashboard/students",
-        },
+         
                  {
           name: "Grades",
           icon: <FaTachometerAlt />,// not found
           link: "/professor-dashboard/grades",
-        },
-                 {
-          name: "Schedule",
-          icon: <RiCalendarScheduleFill />,
-          link: "/professor-dashboard/schedule",
-        },
-                 {
-          name: "Attendance",
-          icon: <FaTachometerAlt />,// not found
-          link: "/professor-dashboard/attendance",
-        },
-                 {
-          name: "Assignments",
-          icon: <MdAssignmentAdd />,
-          link: "/professor-dashboard/assignments",
-        },
-                 {
-          name: "Announcements",
-          icon: <TfiAnnouncement />,
-          link: "/professor-dashboard/announcements",
-        },
-                 {
-          name: "Profile",
-          icon: <CgProfile />,
-          link: "/professor-dashboard/profile",
-        },
+        }
       ]
-    }
+    },
+      {
+      role : "Applicant",
+      navItems : [
+         {
+          name: "Applications",
+          icon: <FaTachometerAlt />,
+          link: "/student/applications",
+        },]},
+        {
+      role : "Student",
+      navItems : [
+         {
+          name: "Applications",
+          icon: <FaTachometerAlt />,
+          link: "/student/applications",
+        },]}
   ];
   const getCurrentUserNavItems = () =>
     navItems.find((item) => item.role === auth.user.role);
@@ -194,6 +176,16 @@ const AdminDashboardLayout = () => {
       toast.error(error.message);
     }
   };
+  const getApplicant = async () => {
+    try {
+      const { data, status } = await applicantApi.getApplicant(auth.user.id);
+      if (status === 200) {
+        dispatch(setApplicant(data));
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
   useEffect(() => {
     switch (auth.user.role) {
       case "UniversityAdmin":
@@ -204,6 +196,12 @@ const AdminDashboardLayout = () => {
         break;
       case "Professor":
         getProfessor();
+        break;
+      case "Applicant":
+        getApplicant();
+        break;
+      case "Student":
+        getApplicant();
         break;
     }
   }, []);

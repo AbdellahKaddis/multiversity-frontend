@@ -531,3 +531,191 @@
     align-items: flex-start;
   }
 }
+/* ---------- Status badges ---------- */
+.statusSubmitted {
+  background: #EBF5FB;
+  color: #3498DB;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.statusUnderReview {
+  background: #FEF9E7;
+  color: #B7950B;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.statusApproved {
+  background: #E8F8F5;
+  color: #16A085;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.statusAccepted {
+  background: #E8F8F5;
+  color: #1E8449;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.statusRejected {
+  background: #FDEDEC;
+  color: #C0392B;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.statusDeclined {
+  background: #F2F3F4;
+  color: #566573;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.statusWaitlisted {
+  background: #FDF2E9;
+  color: #CA6F1E;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* ---------- Accept / Decline buttons ---------- */
+.acceptButton {
+  background-color: #E8F8F5;
+  color: #16A085;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.acceptButton:hover {
+  background-color: #16A085;
+  color: white;
+}
+
+.declineButton {
+  background-color: #FDEDEC;
+  color: #C0392B;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.declineButton:hover {
+  background-color: #C0392B;
+  color: white;
+}
+
+.swal2-select {
+  width: 100%;
+  max-width: 100%;
+}
+/* ---------- Status select ---------- */
+.statusSelect {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  padding: 6px 30px 6px 12px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  line-height: 1.4;
+
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 130px;
+  text-align: left;
+
+  /* Custom caret */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23566673' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 10px;
+}
+
+.statusSelect:hover {
+  filter: brightness(0.97);
+}
+
+.statusSelect:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+/* ---------- Color variants ---------- */
+.selectSubmitted {
+  background-color: #EBF5FB;
+  color: #2471A3;
+}
+
+.selectUnderReview {
+  background-color: #FEF9E7;
+  color: #B7950B;
+}
+
+.selectWaitlisted {
+  background-color: #FDF2E9;
+  color: #CA6F1E;
+}
+
+.selectApproved {
+  background-color: #E8F8F5;
+  color: #16A085;
+}
+
+.selectAccepted {
+  background-color: #E8F8F5;
+  color: #1E8449;
+}
+
+.selectRejected {
+  background-color: #FDEDEC;
+  color: #C0392B;
+}
+
+.selectDeclined {
+  background-color: #F2F3F4;
+  color: #566573;
+}

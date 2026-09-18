@@ -1,7 +1,11 @@
 // src/SignUp/YourPasswordForm.jsx
-import styles from "./signup.module.css";
+import { toast } from "react-toastify";
+import styles from "../signup.module.css";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import applicantApi from "../../../api/applicantApi";
 
-const YourPasswordForm = ({ formData, handleChange, nextStep, prevStep }) => {
+const YourPasswordForm = ({ formData, handleChange, isSubmit, setIsSubmit, prevStep }) => {
   const isPasswordMatch = formData.password === formData.confirmPassword;
 
   const rules = [
@@ -11,7 +15,7 @@ const YourPasswordForm = ({ formData, handleChange, nextStep, prevStep }) => {
     { test: (p) => /\d/.test(p),       message: "At least one digit (0-9)" },
     { test: (p) => /\W/.test(p),       message: "At least one special character (e.g. !@#$%)" },
   ];
-
+  const [errors, setErrors] = useState({});
   const isPasswordValid = (password) => {
     if (password.length < 8) return false;
     if (!/[A-Z]/.test(password)) return false;
@@ -21,8 +25,32 @@ const YourPasswordForm = ({ formData, handleChange, nextStep, prevStep }) => {
     return true;
   };
 
-  const canContinue = isPasswordMatch && isPasswordValid(formData.password);
+  const isValid = isPasswordMatch && isPasswordValid(formData.password);
+const navigate = useNavigate()
+    const handleClick = async () => {
+    setIsSubmit(true);
+    try {
+      if (isValid) {
+          const { firstName, lastName, password, email } = formData;
+          const { status } = await applicantApi.createApplicant({
+            firstName, lastName, password, email,
+          });
 
+          if (status === 201) {
+            setErrors({});
+
+                toast.success("🎉 Account created successfully. Redirecting...", {
+                  onClose: () => {
+                    navigate("/login/student");
+                  },
+                });
+              }
+            }
+    } catch (error) {
+      setErrors((prev) => ({ ...prev, netErr: error.message }));
+    }
+    setIsSubmit(false);
+  };
   return (
     <div className={styles.formCard}>
       <h2>Create password</h2>
@@ -68,13 +96,14 @@ const YourPasswordForm = ({ formData, handleChange, nextStep, prevStep }) => {
         <p className={styles.error}>Password does not match.</p>
       ) : null}
 
-      <button
-        className={`${styles.btnContinue} ${canContinue ? styles.active : styles.disabled}`}
-        onClick={canContinue ? nextStep : undefined}
-        disabled={!canContinue}
-      >
-        Continue
-      </button>
+   {errors.netErr && <p className={styles.error}>{errors.netErr}</p>}
+            <button
+              disabled={isSubmit || !isValid}
+              className={`${styles.btnContinue} ${isValid ? styles.active : styles.disabled}`}
+              onClick={handleClick}
+            >
+              Complete Registration
+            </button>
 
       <div className={styles.navigationLinks}>
         <button className={styles.linkBtn} onClick={prevStep}>

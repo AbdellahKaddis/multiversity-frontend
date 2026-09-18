@@ -1,15 +1,18 @@
 import { configureStore } from '@reduxjs/toolkit';
-import counterReducer from '../features/counter/counterSlice';
+import applicantReducer from '../features/applicant/applicantSlice';
 import authReducer from '../features/auth/authSlice';
 import universityReducer from '../features/university/universitySlice';
 import facultyReducer from '../features/faculty/facultySlice';
 import professorReducer from  '../features/Professor/professorSlice';
+
+
 export const store = configureStore({
   reducer: {
-    counter: counterReducer,
+    application: applicantReducer,
     auth: authReducer,
     university: universityReducer,
     faculty:facultyReducer,
-    professor: professorReducer
+    professor: professorReducer,
+    applicant : applicantReducer
   },
 });

@@ -1,36 +1,43 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import styles from "./signup.module.css";
 
 const SignUpSideBar = ({ currentStep, steps }) => {
+  const location = useLocation();
+  
   return (
-    <div className="sidebar">
-      <div className="logo">MultiVersity</div>
-      <div className="steps">
+    <div className={styles.sidebar}>
+      <div className={styles.logo}>MultiVersity</div>
+      <div className={styles.steps}>
         {steps.map((step, index) => (
-          <div key={index} className={`step ${index === currentStep ? 'active' : ''}`}>
-            <div className="step-indicator">
+          <div
+            key={index}
+            className={`${styles.step} ${index === currentStep ? styles.active : ""}`}
+          >
+            <div className={styles.stepIndicator}>
               {index < currentStep ? (
-                <span className="completed">✓</span>
+                <span className={styles.completed}>✓</span>
               ) : (
-                <span className="number">{index + 1}</span>
+                <span className={styles.number}>{index + 1}</span>
               )}
             </div>
-            <div className="step-content">
+            <div className={styles.stepContent}>
               <h4>{step.title}</h4>
               <p>
+                
                 {index === 0 && 'Provide your name and email'}
                 {index === 1 && 'Enter your verification code'}
                 {index === 2 && 'Choose a secure password'}
-                {index === 3 && 'Provide university details'}
+                { location.pathname === '/signup' ? (index === 3 && 'Provide university details') : ""}
               </p>
             </div>
           </div>
         ))}
       </div>
-      <div className="footer">
-        <div className="navigation-links">
-        <button className="link-btn" ><Link to={'/'}>Back to home</Link></button>
-        <button className="link-btn"><Link to={'/login'}>Sign In</Link></button>
-      </div>
+      <div className={styles.footer}>
+        <div className={styles.navigationLinks}>
+          <button className={styles.linkBtn}><Link to={'/'}>Back to home</Link></button>
+          <button className={styles.linkBtn}><Link to={location.pathname === '/signup' ? '/login' : '/login/student'}>Sign In</Link></button>
+        </div>
       </div>
     </div>
   );

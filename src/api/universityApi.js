@@ -67,6 +67,18 @@ const universityApi = {
                 else
                 throw new Error(error.message)
             }
+    },getUniversities: async() => {
+        try{
+                const response = await fetch(`${baseUrl}universities`,)
+                const data = await response.json();
+
+                return {data,status:response.status};
+            }catch(error){
+                if(error.message === "Failed to fetch")
+                throw new Error("Oops! We're having trouble connecting to the server. Please try again later.");
+                else
+                throw new Error(error.message)
+            }
     },
         getUniversityStatistics:async(universityId) => {
             try{

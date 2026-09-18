@@ -1,0 +1,277 @@
+/* Overlay */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(44, 62, 80, 0.6);
+  display: grid;
+  place-items: center;
+  z-index: 1000;
+  padding: 24px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Modal shell */
+.modal {
+  background: white;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 860px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  animation: slideUp 0.25s ease;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Header */
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 24px 28px;
+  border-bottom: 1px solid #ECEFF1;
+}
+
+.modalTitle {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--primary, #2C3E50);
+}
+
+.modalSubtitle {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted, #7F8C8D);
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 26px;
+  line-height: 1;
+  color: var(--text-muted, #7F8C8D);
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+.closeButton:hover {
+  background: #F2F3F4;
+  color: var(--primary, #2C3E50);
+}
+
+/* Body */
+.modalBody {
+  padding: 24px 28px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Top row — photo + name */
+.topRow {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.photoBox {
+  width: 120px;
+  height: 140px;
+  border-radius: 10px;
+  border: 1px solid #ECEFF1;
+  background: #F9F9F9;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photoPlaceholder {
+  font-size: 40px;
+  color: #B0BEC5;
+}
+
+.topInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.applicantName {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--primary, #2C3E50);
+}
+
+.applicantProgram {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-muted, #7F8C8D);
+}
+
+/* Sections */
+.section {
+  border-top: 1px solid #ECEFF1;
+  padding-top: 20px;
+}
+
+.sectionTitle {
+  margin: 0 0 14px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--secondary, #16A085);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 24px;
+}
+
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  padding: 6px 0;
+  border-bottom: 1px dashed #ECEFF1;
+}
+
+.infoLabel { color: var(--text-muted, #7F8C8D); }
+.infoValue { color: var(--primary, #2C3E50); font-weight: 500; text-align: right; }
+
+/* PDF viewer */
+.pdfBox {
+  border: 1px solid #ECEFF1;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.pdfHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #FAFBFC;
+  border-bottom: 1px solid #ECEFF1;
+}
+
+.pdfIcon { font-size: 18px; }
+.pdfName { font-weight: 600; font-size: 14px; color: var(--primary, #2C3E50); flex: 1; }
+
+.pdfLink {
+  color: var(--info, #3498DB);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.pdfLink:hover { text-decoration: underline; }
+
+.pdfViewer {
+  width: 100%;
+  height: 420px;
+  border: none;
+}
+
+.emptyDocs {
+  color: var(--text-muted, #7F8C8D);
+  font-size: 14px;
+  font-style: italic;
+}
+
+/* Footer */
+.modalFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 28px;
+  border-top: 1px solid #ECEFF1;
+  background: #FAFBFC;
+  border-radius: 0 0 14px 14px;
+}
+
+.statusControl {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.statusLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted, #7F8C8D);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.statusSelect {
+  padding: 8px 14px;
+  border: 1px solid #E0E0E0;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+  color: var(--primary, #2C3E50);
+}
+.statusSelect:focus {
+  outline: none;
+  border-color: var(--info, #3498DB);
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.12);
+}
+
+.closeBtnFooter {
+  padding: 10px 24px;
+  background: var(--secondary, #16A085);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.closeBtnFooter:hover {
+  background: #138D75;
+  box-shadow: 0 4px 12px rgba(22, 160, 133, 0.3);
+}
+
+/* Status badges (reuse from list — paste here too, module scope) */
+.statusSubmitted   { background:#EBF5FB; color:#3498DB; padding:4px 10px; border-radius:12px; font-size:12px; font-weight:600; display:inline-block; }
+.statusUnderReview { background:#FEF9E7; color:#B7950B; padding:4px 10px; border-radius:12px; font-size:12px; font-weight:600; display:inline-block; }
+.statusWaitlisted  { background:#FDF2E9; color:#CA6F1E; padding:4px 10px; border-radius:12px; font-size:12px; font-weight:600; display:inline-block; }
+.statusApproved    { background:#E8F8F5; color:#16A085; padding:4px 10px; border-radius:12px; font-size:12px; font-weight:600; display:inline-block; }
+.statusAccepted    { background:#E8F8F5; color:#1E8449; padding:4px 10px; border-radius:12px; font-size:12px; font-weight:600; display:inline-block; }
+.statusRejected    { background:#FDEDEC; color:#C0392B; padding:4px 10px; border-radius:12px; font-size:12px; font-weight:600; display:inline-block; }
+.statusDeclined    { background:#F2F3F4; color:#566573; padding:4px 10px; border-radius:12px; font-size:12px; font-weight:600; display:inline-block; }
+
+/* Responsive */
+@media (max-width: 640px) {
+  .topRow { flex-direction: column; align-items: flex-start; }
+  .grid { grid-template-columns: 1fr; }
+  .pdfViewer { height: 300px; }
+}

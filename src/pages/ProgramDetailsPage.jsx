@@ -78,7 +78,7 @@ const navigate = useNavigate()
     year: 'numeric',
   });
 };
-console.log("currentAdmission:", currentAdmission);
+
   return (
     <>
 
@@ -130,6 +130,7 @@ console.log("currentAdmission:", currentAdmission);
             size="lg"
             block
              isDisabled={!currentAdmission}
+             onClick={()=> { currentAdmission ? navigate('/signup/student') : '' }}
           >
             {currentAdmission ? "Apply Now ": "Application Closed"}
           </Button>

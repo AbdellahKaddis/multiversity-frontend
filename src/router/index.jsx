@@ -29,6 +29,11 @@ import { ProgramDetailsPage } from "../pages/ProgramDetailsPage";
 import { ProgramsPage } from "../pages/ProgramsPage";
 import AdmissionsList from "../components/Admissions/AdmissionsList";
 import ApplicationWizard from "../components/ApplicationWizard/ApplicationWizard";
+import ApplicantSignUp from "../components/auth/Applicant/ApplicantSignUp";
+import ApplicationsList from "../components/Applications/ApplicationsList";
+import ApplicationsReviewList from "../components/Applications/ApplicationsReviewList";
+import EnrollmentList from "../components/Enrollments/EnrollmentList";
+import StudentList from "../components/Students/StudentList";
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -38,8 +43,16 @@ export const router = createBrowserRouter([
     path: "/signup",
     element: <SignUp />,
   },
+    {
+    path: "/signup/student",
+    element: <ApplicantSignUp />,
+  },
   {
     path: "/login",
+    element: <Login />,
+  },
+    {
+    path: "/login/student",
     element: <Login />,
   },
   {
@@ -88,8 +101,22 @@ export const router = createBrowserRouter([
       { path: "/faculty-dean-dashboard/admissions",
         element: <AdmissionsList />,
       },
-       { path: "/faculty-dean-dashboard/applications",
+
+       { path: "/student/applications",
+        element: <ApplicationsList />,
+      },
+      
+       { path: "/student/applications/apply",
         element: <ApplicationWizard />,
+      },
+        { path: "/faculty-dean-dashboard/applications",
+        element: <ApplicationsReviewList />,
+      },
+        { path: "/faculty-dean-dashboard/enrollments",
+        element: <EnrollmentList />,
+      },
+         { path: "/faculty-dean-dashboard/students",
+        element: <StudentList />,
       },
     ],
   },

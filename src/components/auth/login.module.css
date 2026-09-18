@@ -1,4 +1,4 @@
-/* src/Login/styles.css */
+/* src/Login/Login.module.css */
 :root {
   --primary: #2C3E50;
   --secondary: #16A085;
@@ -11,7 +11,7 @@
   --info: #3498DB;
 }
 
-.login-container {
+.loginContainer {
   display: flex;
   min-height: 100vh;
   font-family: 'Inter', sans-serif;
@@ -41,13 +41,13 @@
   margin-bottom: 40px;
 }
 
-.benefit-card {
+.benefitCard {
   display: flex;
   gap: 20px;
   align-items: flex-start;
 }
 
-.benefit-card .icon {
+.benefitCard .icon {
   width: 48px;
   height: 48px;
   border-radius: 12px;
@@ -58,19 +58,19 @@
   flex-shrink: 0;
 }
 
-.benefit-card .icon svg {
+.benefitCard .icon svg {
   width: 24px;
   height: 24px;
   fill: var(--secondary);
 }
 
-.benefit-card h4 {
+.benefitCard h4 {
   margin: 0 0 8px;
   color: var(--text-primary);
   font-size: 18px;
 }
 
-.benefit-card p {
+.benefitCard p {
   margin: 0;
   color: var(--text-muted);
   font-size: 15px;
@@ -119,7 +119,7 @@
   color: var(--text-muted);
 }
 
-.form-container {
+.formContainer {
   flex: 1;
   display: flex;
   align-items: center;
@@ -127,7 +127,7 @@
   padding: 40px;
 }
 
-.form-card {
+.formCard {
   width: 100%;
   max-width: 480px;
   background: white;
@@ -153,7 +153,7 @@ h2 {
   font-size: 16px;
 }
 
-.error-banner {
+.errorBanner {
   background: rgba(192, 57, 43, 0.1);
   border: 1px solid rgba(192, 57, 43, 0.2);
   border-radius: 8px;
@@ -166,17 +166,17 @@ h2 {
   font-size: 14px;
 }
 
-.error-banner svg {
+.errorBanner svg {
   width: 20px;
   height: 20px;
   fill: var(--error);
 }
 
-.input-group {
+.inputGroup {
   margin-bottom: 20px;
 }
 
-.label-row {
+.labelRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -190,7 +190,7 @@ label {
   font-size: 14px;
 }
 
-.forgot-password {
+.forgotPassword {
   background: none;
   border: none;
   color: var(--info);
@@ -200,7 +200,7 @@ label {
   padding: 0;
 }
 
-.forgot-password:hover {
+.forgotPassword:hover {
   text-decoration: underline;
 }
 
@@ -219,13 +219,13 @@ input:focus {
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
 }
 
-.remember-me {
+.rememberMe {
   margin: 20px 0;
   display: flex;
   align-items: center;
 }
 
-.remember-me label {
+.rememberMe label {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -233,11 +233,11 @@ input:focus {
   color: var(--text-muted);
 }
 
-.remember-me input {
+.rememberMe input {
   width: auto;
 }
 
-.btn-login {
+.btnLogin {
   width: 100%;
   padding: 16px;
   background: var(--accent);
@@ -250,16 +250,16 @@ input:focus {
   transition: background 0.3s;
 }
 
-.btn-login.active {
+.btnLogin.active {
   background: var(--secondary);
 }
 
-.btn-login.active:hover {
+.btnLogin.active:hover {
   background: #138a70;
   transform: translateY(-2px);
 }
 
-.btn-login.disabled {
+.btnLogin.disabled {
   background: #bdc3c7;
   cursor: not-allowed;
 }
@@ -282,13 +282,13 @@ input:focus {
   font-size: 14px;
 }
 
-.social-login {
+.socialLogin {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.btn-social {
+.btnSocial {
   padding: 14px;
   border: 1px solid #ddd;
   border-radius: 8px;
@@ -303,12 +303,12 @@ input:focus {
   gap: 10px;
 }
 
-.btn-social:hover {
+.btnSocial:hover {
   border-color: var(--info);
   transform: translateY(-2px);
 }
 
-.btn-social svg {
+.btnSocial svg {
   width: 20px;
   height: 20px;
 }
@@ -318,24 +318,24 @@ input:focus {
   height: 18px;
 }
 
-.signup-prompt {
+.signupPrompt {
   text-align: center;
   margin-top: 25px;
   color: var(--text-muted);
   font-size: 15px;
 }
 
-.signup-prompt a {
+.signupPrompt a {
   color: var(--info);
   font-weight: 500;
   text-decoration: none;
 }
 
-.signup-prompt a:hover {
+.signupPrompt a:hover {
   text-decoration: underline;
 }
 
-.modal-overlay {
+.modalOverlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -349,7 +349,7 @@ input:focus {
   animation: fadeIn 0.3s ease-out;
 }
 
-.forgot-modal {
+.forgotModal {
   background: white;
   border-radius: 12px;
   padding: 40px;
@@ -361,7 +361,7 @@ input:focus {
   position: relative;
 }
 
-.close-btn {
+.closeBtn {
   position: absolute;
   top: 15px;
   right: 15px;
@@ -373,17 +373,17 @@ input:focus {
   transition: background 0.3s;
 }
 
-.close-btn:hover {
+.closeBtn:hover {
   background: rgba(0,0,0,0.05);
 }
 
-.close-btn svg {
+.closeBtn svg {
   width: 20px;
   height: 20px;
   fill: var(--text-muted);
 }
 
-.forgot-modal .icon {
+.forgotModal .icon {
   width: 80px;
   height: 80px;
   margin: 0 auto 25px;
@@ -394,18 +394,18 @@ input:focus {
   border-radius: 50%;
 }
 
-.forgot-modal .icon svg {
+.forgotModal .icon svg {
   width: 40px;
   height: 40px;
   fill: var(--info);
 }
 
-.forgot-modal h2 {
+.forgotModal h2 {
   color: var(--primary);
   margin-bottom: 15px;
 }
 
-.success-message {
+.successMessage {
   background: rgba(39, 174, 96, 0.1);
   border-radius: 8px;
   padding: 20px;
@@ -413,17 +413,17 @@ input:focus {
   text-align: left;
 }
 
-.success-message p {
+.successMessage p {
   margin: 0 0 10px;
   color: var(--text-primary);
   line-height: 1.5;
 }
 
-.success-message p:last-child {
+.successMessage p:last-child {
   margin-bottom: 0;
 }
 
-.btn-reset {
+.btnReset {
   width: 100%;
   padding: 16px;
   background: var(--info);
@@ -437,16 +437,16 @@ input:focus {
   margin-top: 15px;
 }
 
-.btn-reset.active:hover {
+.btnReset.active:hover {
   background: #2980b9;
   transform: translateY(-2px);
 }
 
-.back-to-login {
+.backToLogin {
   margin-top: 25px;
 }
 
-.back-to-login button {
+.backToLogin button {
   background: none;
   border: none;
   color: var(--info);
@@ -459,11 +459,11 @@ input:focus {
   margin: 0 auto;
 }
 
-.back-to-login button:hover {
+.backToLogin button:hover {
   text-decoration: underline;
 }
 
-.back-to-login svg {
+.backToLogin svg {
   width: 20px;
   height: 20px;
   fill: var(--info);
@@ -476,7 +476,7 @@ input:focus {
   position: relative;
 }
 
-.double-bounce1, .double-bounce2 {
+.doubleBounce1, .doubleBounce2 {
   width: 100%;
   height: 100%;
   border-radius: 50%;
@@ -488,7 +488,7 @@ input:focus {
   animation: sk-bounce 2.0s infinite ease-in-out;
 }
 
-.double-bounce2 {
+.doubleBounce2 {
   animation-delay: -1.0s;
 }
 
@@ -522,20 +522,21 @@ input:focus {
     display: none;
   }
   
-  .form-container {
+  .formContainer {
     padding: 20px;
   }
   
-  .form-card {
+  .formCard {
     padding: 30px;
   }
 }
 
 @media (max-width: 480px) {
-  .form-card {
+  .formCard {
     padding: 20px;
   }
 }
-.no-center {
+
+.noCenter {
   text-align: left;
 }
