@@ -1,17 +1,17 @@
-import {baseUrl}from './authApi'
+import { baseUrl } from "./authApi";
+import { apiFetch } from "../utils/apiClient";
 
 const enrollmentApi = {
- getEnrollments: async ({
-  applicantId,
-  programId,
-  universityId,
-  facultyId,
-  academicYear,
-  studentNumber,
-  status,
-  yearLevel,
-} = {}) => {
-  try {
+  getEnrollments: async ({
+    applicantId,
+    programId,
+    universityId,
+    facultyId,
+    academicYear,
+    studentNumber,
+    status,
+    yearLevel,
+  } = {}) => {
     const params = new URLSearchParams();
     if (applicantId)   params.append("applicantId", applicantId);
     if (programId)     params.append("programId", programId);
@@ -25,77 +25,55 @@ const enrollmentApi = {
     const query = params.toString();
     const url = `${baseUrl}enrollments${query ? `?${query}` : ""}`;
 
-    const response = await fetch(url);
-    const data = await response.json();
-    return { data, status: response.status };
-  } catch (error) {
-    if (error.message === "Failed to fetch")
-      throw new Error("Oops! We're having trouble connecting to the server. Please try again later.");
-    else
-      throw new Error(error.message);
-  }
-},
-        createEnrollment : async({  applicantId, programId, facultyId, academicYear, yearLevel}) => {
-                try{
-                    const response = await fetch(`${baseUrl}enrollments`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        applicantId, programId, facultyId, academicYear, yearLevel
-                    })
-                });
-    
-                const data = await response.json();
+    return await apiFetch(url);
+  },
 
-                return {data,status:response.status};
-                }catch(error){
-                    if(error.message === "Failed to fetch")
-                    throw new Error("Oops! We're having trouble connecting to the server. Please try again later.");
-                    else
-                    throw new Error(error.message)
-                }
-        },
-        updateEnrollment : async({enrollmentId, applicantId, programId, facultyId, academicYear, yearLevel, status}) => {
-                try{
-                    const response = await fetch(`${baseUrl}enrollments/${enrollmentId}`,
-                {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        applicantId, programId, facultyId, academicYear, yearLevel, status
-                    })
-                });
-                
-                return {status:response.status};
-                }catch(error){
-                    if(error.message === "Failed to fetch")
-                    throw new Error("Oops! We're having trouble connecting to the server. Please try again later.");
-                    else
-                    throw new Error(error.message)
-                }
-        },
-        deleteEnrollment : async(enrollmentId) => {
-                try{
-                    const response = await fetch(`${baseUrl}enrollments/${enrollmentId}`,
-                {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                });
-                
-                return {status:response.status};
-                }catch(error){
-                    if(error.message === "Failed to fetch")
-                    throw new Error("Oops! We're having trouble connecting to the server. Please try again later.");
-                    else
-                    throw new Error(error.message)
-                }
-        },
+  createEnrollment: async ({
+    applicantId,
+    programId,
+    facultyId,
+    academicYear,
+    yearLevel,
+  }) =>
+    await apiFetch(`${baseUrl}enrollments`, {
+      method: "POST",
+      body: JSON.stringify({
+        applicantId,
+        programId,
+        facultyId,
+        academicYear,
+        yearLevel,
+      }),
+    }),
+
+  updateEnrollment: async ({
+    enrollmentId,
+    applicantId,
+    programId,
+    facultyId,
+    academicYear,
+    yearLevel,
+    status,
+  }) =>
+    await apiFetch(`${baseUrl}enrollments/${enrollmentId}`, {
+      method: "PUT",
+      body: JSON.stringify({
+        applicantId,
+        programId,
+        facultyId,
+        academicYear,
+        yearLevel,
+        status,
+      }),
+    }),
+
+  deleteEnrollment: async (enrollmentId) =>
+    await apiFetch(`${baseUrl}enrollments/${enrollmentId}`, {
+      method: "DELETE",
+    }),
+
+  getEnrollmentsForCourse: async (courseId) =>
+    await apiFetch(`${baseUrl}enrollments/course/${courseId}/students`),
 };
+
 export default enrollmentApi;

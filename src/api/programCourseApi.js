@@ -1,86 +1,34 @@
 import { baseUrl } from "./authApi";
+import { apiFetch } from "../utils/apiClient";
+
 const programCourseApi = {
   getAllAssignedCoursesForProgram: async (facultyId, programId) => {
-    try {
-      const response = await fetch(
-        `${baseUrl}programCourses?facultyId=${facultyId}&programId=${programId}`
-      );
-      const data = await response.json();
-      return { data, status: response.status };
-    } catch (error) {
-      if (error.message === "Failed to fetch")
-        throw new Error(
-          "Oops! We're having trouble connecting to the server. Please try again later."
-        );
-      else throw new Error(error.message);
-    }
+    const params = new URLSearchParams();
+    if (facultyId) params.append("facultyId", facultyId);
+    if (programId) params.append("programId", programId);
+
+    const query = params.toString();
+    const url = `${baseUrl}programCourses${query ? `?${query}` : ""}`;
+
+    return await apiFetch(url);
   },
-  addCourseToProgram: async ({ programId, courseId, semester }) => {
-    try {
-      const response = await fetch(`${baseUrl}programCourses`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          programId,
-          courseId,
-          semester,
-        }),
-      });
 
-      const data = await response.json();
+  addCourseToProgram: async ({ programId, courseId, semester }) =>
+    await apiFetch(`${baseUrl}programCourses`, {
+      method: "POST",
+      body: JSON.stringify({ programId, courseId, semester }),
+    }),
 
-      return { data, status: response.status };
-    } catch (error) {
-      if (error.message === "Failed to fetch")
-        throw new Error(
-          "Oops! We're having trouble connecting to the server. Please try again later."
-        );
-      else throw new Error(error.message);
-    }
-  },
-  addCoursesToProgram: async (programCourseCollection) => {
-    try {
-      const response = await fetch(`${baseUrl}programCourses`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(programCourseCollection),
-      });
+  addCoursesToProgram: async (programCourseCollection) =>
+    await apiFetch(`${baseUrl}programCourses`, {
+      method: "POST",
+      body: JSON.stringify(programCourseCollection),
+    }),
 
-      const data = await response.json();
-
-      return { data, status: response.status };
-    } catch (error) {
-      if (error.message === "Failed to fetch")
-        throw new Error(
-          "Oops! We're having trouble connecting to the server. Please try again later."
-        );
-      else throw new Error(error.message);
-    }
-  },
-  deleteCourseFromProgram: async (programCourseId) => {
-    try {
-      const response = await fetch(
-        `${baseUrl}programCourses/${programCourseId}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      return { status: response.status };
-    } catch (error) {
-      if (error.message === "Failed to fetch")
-        throw new Error(
-          "Oops! We're having trouble connecting to the server. Please try again later."
-        );
-      else throw new Error(error.message);
-    }
-  },
+  deleteCourseFromProgram: async (programCourseId) =>
+    await apiFetch(`${baseUrl}programCourses/${programCourseId}`, {
+      method: "DELETE",
+    }),
 };
+
 export default programCourseApi;

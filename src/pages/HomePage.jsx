@@ -2,11 +2,11 @@
 import { UniversityHero } from '../components/university/UniversityHero';
 import { UniversityStats } from '../components/university/UniversityStats';
 
-export function HomePage({ onNavigate }) {
+export function HomePage() {
 
   return (
     <>
-      <UniversityHero onNavigate={onNavigate} />
+      <UniversityHero  />
       <UniversityStats />
     </>
   );

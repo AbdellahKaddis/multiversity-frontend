@@ -1,195 +1,234 @@
-import React, { useState } from 'react';
 import styles from './style.module.css';
-import { FaTachometerAlt, FaGraduationCap, FaBuilding, FaBook, FaUserGraduate, FaChalkboardTeacher, FaCalendarAlt, FaCog, FaSearch, FaBell, FaChevronDown, FaArrowUp, FaArrowDown, FaMapMarkerAlt } from 'react-icons/fa';
+import {
+  FaUserGraduate,
+  FaGraduationCap,
+  FaBook,
+  FaClipboardList,
+  FaArrowUp,
+  FaArrowDown,
+} from 'react-icons/fa';
+import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
+import { useSelector } from 'react-redux';
+import facultyApi from '../../api/facultyApi';
+import academicProgramApi from '../../api/academicProgramApi';
+import applicantApi from '../../api/applicantApi';
+import applicationApi from '../../api/applicationApi';
+
+const STATUS_META = {
+  Submitted:   { label: 'Submitted',    className: 'badgeSubmitted' },
+  UnderReview: { label: 'Under Review', className: 'badgeReview' },
+  Approved:    { label: 'Approved',     className: 'badgeApproved' },
+  Rejected:    { label: 'Rejected',     className: 'badgeRejected' },
+  Waitlisted:  { label: 'Waitlisted',   className: 'badgeReview' },
+  Accepted:    { label: 'Accepted',     className: 'badgeApproved' },
+  Declined:    { label: 'Declined',     className: 'badgeRejected' },
+};
+
+const formatRelative = (dateString) => {
+  if (!dateString) return '—';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return '—';
+  const diff = Date.now() - date.getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days}d ago`;
+  return date.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+};
 
 const UniversityAdminDashboard = () => {
-  const [selectedDate, setSelectedDate] = useState(20);
-  
-  // Stats data
-  const stats = [
-    { title: "Total Students", value: "12,345", icon: <FaUserGraduate />, change: 5.2, positive: true },
-    { title: "Faculty Members", value: "245", icon: <FaChalkboardTeacher />, change: 2.1, positive: true },
-    { title: "Active Courses", value: "89", icon: <FaBook />, change: 1.3, positive: false },
-    { title: "Upcoming Events", value: "12", icon: <FaCalendarAlt />, change: 3.7, positive: true }
-  ];
-  
-  // Recent activities
-  const activities = [
-    { 
-      user: { name: "Michael Johnson", initials: "MJ" },
-      activity: "Updated course syllabus",
-      details: "CSC101 - Introduction to Programming",
-      time: "10 min ago",
-      status: "Completed"
-    },
-    { 
-      user: { name: "Sarah Davis", initials: "SD" },
-      activity: "Added new student",
-      details: "Computer Science Department",
-      time: "25 min ago",
-      status: "Completed"
-    },
-    { 
-      user: { name: "Robert Parker", initials: "RP" },
-      activity: "Scheduled new lecture",
-      details: "PHY201 - Advanced Physics",
-      time: "1 hour ago",
-      status: "Pending"
-    },
-    { 
-      user: { name: "Emma Smith", initials: "ES" },
-      activity: "Submitted grades",
-      details: "MAT301 - Linear Algebra",
-      time: "2 hours ago",
-      status: "In Review"
-    },
-    { 
-      user: { name: "Thomas Wilson", initials: "TW" },
-      activity: "Created new course",
-      details: "ENG401 - Advanced Engineering",
-      time: "3 hours ago",
-      status: "Completed"
-    }
-  ];
-  
-  // Calendar data
-  const days = [
-    ['Mon', 26], ['Tue', 27], ['Wed', 28], ['Thu', 29], ['Fri', 30], ['Sat', 1], ['Sun', 2],
-    [3], [4], [5], [6], [7], [8], [9],
-    [10], [11], [12], [13, true], [14, true], [15], [16],
-    [17], [18], [19], [20, true], [21, true], [22], [23],
-    [24], [25], [26], [27], [28], [29], [30]
-  ];
-  
-  const events = [
-    { time: "10:00 AM - 11:30 AM", title: "Faculty Meeting", location: "Administration Building, Room 305" },
-    { time: "2:00 PM - 4:00 PM", title: "Curriculum Review Session", location: "Library Conference Room" },
-    { time: "4:30 PM - 6:00 PM", title: "Student Orientation", location: "Main Auditorium" }
-  ];
-  
-  const getStatusClass = (status) => {
-    switch(status) {
-      case "Completed": return "success";
-      case "Pending": return "warning";
-      case "In Review": return "info";
-      default: return "";
-    }
-  };
+  const university = useSelector((state) => state.university.university);
+
+  const [stats, setStats] = useState([]);
+  const [recentApplications, setRecentApplications] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!university?.id) return;
+
+    const load = async () => {
+      setLoading(true);
+      try {
+        const [facultiesRes, programsRes, applicationsRes, studentsRes] =
+          await Promise.all([
+            facultyApi.getFaculties(university.id),
+            academicProgramApi.getAcademicPrograms(null, null, university.id),
+            applicationApi.getApplications({ universityId: university.id }),
+            applicantApi.getApplicants({
+              universityId: university.id,
+              status: 'Enrolled',
+            }),
+          ]);
+
+        const faculties = facultiesRes.status === 200 ? facultiesRes.data : [];
+        const programs = programsRes.status === 200 ? programsRes.data : [];
+        const applications =
+          applicationsRes.status === 200 ? applicationsRes.data : [];
+        const students = studentsRes.status === 200 ? studentsRes.data : [];
+
+        const activeApplications = applications.filter(
+          (a) => a.status === 'Submitted' || a.status === 'UnderReview'
+        ).length;
+
+        setStats([
+          {
+            title: 'Total Students',
+            value: students.length.toLocaleString(),
+            icon: <FaUserGraduate />,
+          },
+          {
+            title: 'Faculties',
+            value: faculties.length.toLocaleString(),
+            icon: <FaGraduationCap />,
+          },
+          {
+            title: 'Academic Programs',
+            value: programs.length.toLocaleString(),
+            icon: <FaBook />,
+          },
+          {
+            title: 'Active Applications',
+            value: activeApplications.toLocaleString(),
+            icon: <FaClipboardList />,
+          },
+        ]);
+
+        const recent = applications
+          .slice()
+          .sort(
+            (a, b) =>
+              new Date(b.submittedAt ?? 0) - new Date(a.submittedAt ?? 0)
+          )
+          .slice(0, 5)
+          .map((a) => ({
+            id: a.id,
+            applicant: a.applicantFullName ?? '—',
+            program: a.programName ?? '—',
+            submitted: a.submittedAt,
+            status: a.status,
+          }));
+
+        setRecentApplications(recent);
+      } catch (error) {
+        toast.error(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    load();
+  }, [university?.id]);
 
   return (
-          <>
-          <h1 className={styles["dashboard-title"]}>Dashboard Overview</h1>
-          
-          {/* Stats Cards */}
-          <div className={styles["stats-grid"]}>
-            {stats.map((stat, index) => (
-              <div className={styles["stat-card"]} key={index}>
-                <div className={styles["stat-header"]}>
-                  <div className={styles["stat-title"]}>{stat.title}</div>
-                  <div className={styles["stat-icon"]}>
-                    {stat.icon}
-                  </div>
+    <>
+      <h1 className={styles['dashboard-title']}>Dashboard Overview</h1>
+
+      {/* Stats Cards */}
+      <div className={styles['stats-grid']}>
+        {loading
+          ? Array.from({ length: 4 }).map((_, i) => (
+              <div
+                className={`${styles['stat-card']} ${styles.skeletonCard}`}
+                key={i}
+              >
+                <div className={styles.skeletonLine} style={{ width: '60%' }} />
+                <div
+                  className={styles.skeletonLine}
+                  style={{ width: '40%', height: '28px', marginTop: '16px' }}
+                />
+                <div
+                  className={styles.skeletonLine}
+                  style={{ width: '50%', marginTop: '12px' }}
+                />
+              </div>
+            ))
+          : stats.map((stat, index) => (
+              <div className={styles['stat-card']} key={index}>
+                <div className={styles['stat-header']}>
+                  <div className={styles['stat-title']}>{stat.title}</div>
+                  <div className={styles['stat-icon']}>{stat.icon}</div>
                 </div>
-                <div className={styles["stat-value"]}>{stat.value}</div>
-                <div className={`${styles["stat-change"]} ${stat.positive ? '' : styles.negative}`}>
-                  {stat.positive ? <FaArrowUp /> : <FaArrowDown />}
-                  <span>{stat.change}% from last month</span>
-                </div>
+                <div className={styles['stat-value']}>{stat.value}</div>
               </div>
             ))}
+      </div>
+
+      {/* Recent Applications */}
+      <div className={styles['section-header']}>
+        <h2 className={styles['section-title']}>Recent Applications</h2>
+      </div>
+
+      <div className={styles['card']}>
+        {loading ? (
+          <div className={styles.tableEmpty}>
+            <div className={styles.spinner} />
+            <p>Loading applications…</p>
           </div>
-          
-          {/* Main Content Grid */}
-          <div className={styles["content-grid"]}>
-            {/* Left Column - Recent Activities */}
-            <div className={styles["main-content-col"]}>
-              <div className={styles.card}>
-                <div className={styles["card-header"]}>
-                  <div className={styles["card-title"]}>Recent Activities</div>
-                  <div className={styles["view-all"]}>View All</div>
-                </div>
-                
-                <div className={styles["activity-table"]}>
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>User</th>
-                        <th>Activity</th>
-                        <th>Time</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {activities.map((activity, index) => (
-                        <tr key={index}>
-                          <td>
-                            <div className={styles["activity-user"]}>
-                              <div className={styles["user-avatar-sm"]}>{activity.user.initials}</div>
-                              <div>{activity.user.name}</div>
-                            </div>
-                          </td>
-                          <td>
-                            <div className={styles["activity-detail"]}>{activity.activity}</div>
-                            <div className={styles["activity-time"]}>{activity.details}</div>
-                          </td>
-                          <td>{activity.time}</td>
-                          <td>
-                            <div className={`${styles["status-badge"]} ${getStatusClass(activity.status)}`}>
-                              {activity.status}
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-            
-            {/* Right Column - Calendar */}
-            <div className={styles["sidebar-col"]}>
-              <div className={styles.card}>
-                <div className={styles["card-header"]}>
-                  <div className={styles["card-title"]}>Academic Calendar</div>
-                  <div className={styles["view-all"]}>View All</div>
-                </div>
-                
-                <div className={styles.calendar}>
-                  {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
-                    <div key={day} className={styles["calendar-header"]}>{day}</div>
-                  ))}
-                  
-                  {days.map((day, index) => {
-                    const isEvent = Array.isArray(day) && day.length > 1 && day[1];
-                    const dayValue = Array.isArray(day) ? day[0] : day;
-                    
-                    return (
-                      <div 
-                        key={index}
-                        className={`${styles["calendar-day"]} ${selectedDate === dayValue ? 'active' : ''} ${isEvent ? 'event' : ''}`}
-                        onClick={() => setSelectedDate(dayValue)}
+        ) : recentApplications.length === 0 ? (
+          <div className={styles.tableEmpty}>
+            <div className={styles.emptyIcon}>📭</div>
+            <h3>No applications yet</h3>
+            <p>Applications from applicants will appear here.</p>
+          </div>
+        ) : (
+          <table className={styles['activity-table']}>
+            <thead>
+              <tr>
+                <th>Applicant</th>
+                <th>Program</th>
+                <th>Submitted</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {recentApplications.map((app) => {
+                const meta = STATUS_META[app.status] ?? {
+                  label: app.status,
+                  className: 'badgeSubmitted',
+                };
+                return (
+                  <tr key={app.id}>
+                    <td>
+                      <div className={styles['activity-user']}>
+                        <div className={styles['user-avatar-sm']}>
+                          {(app.applicant ?? '?').charAt(0).toUpperCase()}
+                        </div>
+                        <span className={styles['activity-detail']}>
+                          {app.applicant}
+                        </span>
+                      </div>
+                    </td>
+                    <td>{app.program}</td>
+                    <td>
+                      <span className={styles['activity-time']}>
+                        {formatRelative(app.submitted)}
+                      </span>
+                    </td>
+                    <td>
+                      <span
+                        className={`${styles['status-badge']} ${
+                          styles[meta.className] || ''
+                        }`}
                       >
-                        {dayValue}
-                      </div>
-                    );
-                  })}
-                </div>
-                
-                <div className={styles["calendar-events"]}>
-                  {events.map((event, index) => (
-                    <div key={index} className={styles["event-item"]}>
-                      <div className={styles["event-time"]}>{event.time}</div>
-                      <div className={styles["event-title"]}>{event.title}</div>
-                      <div className={styles["event-location"]}>
-                        <FaMapMarkerAlt /> {event.location}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
+                        {meta.label}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </>
   );
 };
 

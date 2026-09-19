@@ -18,10 +18,10 @@ const formatDate = (dateString) => {
 };
 
 const ENROLLMENT_STATUS = {
-  Active:    { className: "statusApproved",   label: "Active" },
+  Active:    { className: "statusApproved",    label: "Active" },
   Suspended: { className: "statusUnderReview", label: "Suspended" },
-  Graduated: { className: "statusAccepted",   label: "Graduated" },
-  Withdrawn: { className: "statusDeclined",   label: "Withdrawn" },
+  Graduated: { className: "statusAccepted",    label: "Graduated" },
+  Withdrawn: { className: "statusDeclined",    label: "Withdrawn" },
 };
 
 const EnrollmentList = () => {
@@ -31,16 +31,20 @@ const EnrollmentList = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [isAddAndUpdateEnrollmentModalOpen, setIsAddAndUpdateEnrollmentModalOpen] = useState(false);
   const [enrollmentToBeUpdated, setEnrollmentToBeUpdated] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const faculty = useSelector((state) => state.faculty.faculty);
 
   const getAllEnrollments = async (facultyId) => {
+    setLoading(true);
     try {
       const { data, status } = await enrollmentApi.getEnrollments({ facultyId });
       if (status === 200) setEnrollments(data);
       else toast.error("Something went wrong we could not load enrollments.");
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -134,7 +138,11 @@ const EnrollmentList = () => {
   };
 
   useEffect(() => {
-    getAllEnrollments(faculty.id);
+    if (faculty?.id) {
+      getAllEnrollments(faculty.id);
+    } else {
+      setLoading(false);
+    }
   }, [faculty?.id]);
 
   return (
@@ -206,86 +214,91 @@ const EnrollmentList = () => {
       </div>
 
       <div className={styles.tableContainer}>
-        <table className={styles.table}>
-          <thead className={styles.tableHeader}>
-            <tr>
-              <th>Student Number</th>
-              <th>Applicant</th>
-              <th>Program</th>
-              <th>Academic Year</th>
-              <th>Year Level</th>
-              <th>Enrolled On</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedEnrollments.map((enrollment) => {
-              const meta = ENROLLMENT_STATUS[enrollment.status] ?? {
-                className: "statusSubmitted",
-                label: enrollment.status,
-              };
-
-              return (
-                <tr key={enrollment.id} className={styles.tableRow}>
-                  <td className={styles.codeCell}>
-                    <span className={styles.facultyCode}>
-                      {enrollment.studentNumber ?? "—"}
-                    </span>
-                  </td>
-
-                  <td className={styles.nameCell}>
-                    <div className={styles.facultyName}>
-                      {enrollment.applicantFullName ?? "—"}
-                    </div>
-                  </td>
-
-                  <td className={styles.nameCell}>
-                    <div className={styles.facultyName}>
-                      {enrollment.programName ?? "—"}
-                    </div>
-                  </td>
-
-                  <td>{enrollment.academicYear ?? "—"}</td>
-
-                  <td>{enrollment.yearLevel ?? "—"}</td>
-
-                  <td>{formatDate(enrollment.enrolledAt)}</td>
-
-                  <td>
-                    <span className={styles[meta.className]}>{meta.label}</span>
-                  </td>
-
-                  <td>
-                    <div className={styles.actionButtons}>
-                      <button
-                        className={styles.editButton}
-                        onClick={(e) => handleEdit(enrollment, e)}
-                        title="Edit Enrollment"
-                      >
-                        ✏️
-                      </button>
-                      <button
-                        className={styles.deleteButton}
-                        onClick={(e) => handleDelete(enrollment, e)}
-                        title="Delete Enrollment"
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-
-        {sortedEnrollments.length === 0 && (
+        {loading ? (
+          <div className={styles.loadingState}>
+            <div className={styles.spinner} />
+            <p>Loading enrollments…</p>
+          </div>
+        ) : sortedEnrollments.length === 0 ? (
           <div className={styles.emptyState}>
             <div className={styles.emptyIcon}>🎓</div>
             <h3>No enrollments found</h3>
             <p>Try adjusting your search or add a new enrollment.</p>
           </div>
+        ) : (
+          <table className={styles.table}>
+            <thead className={styles.tableHeader}>
+              <tr>
+                <th>Student Number</th>
+                <th>Applicant</th>
+                <th>Program</th>
+                <th>Academic Year</th>
+                <th>Year Level</th>
+                <th>Enrolled On</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedEnrollments.map((enrollment) => {
+                const meta = ENROLLMENT_STATUS[enrollment.status] ?? {
+                  className: "statusSubmitted",
+                  label: enrollment.status,
+                };
+
+                return (
+                  <tr key={enrollment.id} className={styles.tableRow}>
+                    <td className={styles.codeCell}>
+                      <span className={styles.facultyCode}>
+                        {enrollment.studentNumber ?? "—"}
+                      </span>
+                    </td>
+
+                    <td className={styles.nameCell}>
+                      <div className={styles.facultyName}>
+                        {enrollment.applicantFullName ?? "—"}
+                      </div>
+                    </td>
+
+                    <td className={styles.nameCell}>
+                      <div className={styles.facultyName}>
+                        {enrollment.programName ?? "—"}
+                      </div>
+                    </td>
+
+                    <td>{enrollment.academicYear ?? "—"}</td>
+
+                    <td>{enrollment.yearLevel ?? "—"}</td>
+
+                    <td>{formatDate(enrollment.enrolledAt)}</td>
+
+                    <td>
+                      <span className={styles[meta.className]}>{meta.label}</span>
+                    </td>
+
+                    <td>
+                      <div className={styles.actionButtons}>
+                        <button
+                          className={styles.editButton}
+                          onClick={(e) => handleEdit(enrollment, e)}
+                          title="Edit Enrollment"
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          className={styles.deleteButton}
+                          onClick={(e) => handleDelete(enrollment, e)}
+                          title="Delete Enrollment"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         )}
       </div>
     </>

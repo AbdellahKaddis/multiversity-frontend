@@ -29,37 +29,27 @@ const Login = () => {
       }
 
       if (status === 200) {
-        localStorage.setItem("token", data.token);
+  const decoded = jwtDecode(data.token);
 
-        const decoded = jwtDecode(data.token);
-        console.log(decoded);
+  
+  dispatch(loginSuccess({
+    user: {
+      id: decoded.sub,
+      name: decoded.name,
+      role: decoded.role,
+    },
+    accessToken: data.token,
+  }));
 
-        dispatch(loginSuccess({
-          user: {
-            id: decoded.sub,
-            name: decoded.name,
-            role: decoded.role
-          },
-          accessToken: data.token
-        }));
-
-        switch (decoded.role) {
-          case "UniversityAdmin":
-            navigate('/university-admin-dashboard');
-            break;
-          case "Dean":
-            navigate('/faculty-dean-dashboard');
-            break;
-          case "Professor":
-            navigate('/professor-dashboard');
-            break;
-          case "Applicant":
-            navigate('/student/applications');
-            break;
-          case "Student":
-            navigate('/student/applications');
-        }
-      }
+  switch (decoded.role) {
+    case "UniversityAdmin": navigate("/university-admin-dashboard"); break;
+    case "Dean":            navigate("/faculty-dean-dashboard");     break;
+    case "Professor":       navigate("/professor-dashboard/courses"); break;
+    case "Applicant":       navigate("/student/applications");        break;
+    case "Student":         navigate("/student/grades");              break;
+    default:                navigate("/");
+  }
+}
     } catch (error) {
       setError(error.message);
     } finally {

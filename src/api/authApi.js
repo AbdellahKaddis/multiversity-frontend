@@ -1,183 +1,63 @@
+import { apiFetch } from "../utils/apiClient";
+
 export const baseUrl = "https://localhost:5001/api/";
+
 const authApi = {
-    isEmailAlreadyExists:async(email) => {
-        
-        try
-        {
-            const response = await fetch(`${baseUrl}auth/check-email/${email}`);
-        
-            const data = await response.json();
-            return data.exists;
-        }catch(error)
-        {
-            if(error.message === "Failed to fetch")
-                throw new Error("Oops! We're having trouble connecting to the server. Please try again later.");
-            else
-                throw new Error(error.message)
-        }
-    },
-    sendVerificationCode:async(email) => {
-        try{
-            const response = await fetch(`${baseUrl}auth/verify-email`,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email
-                })
-            })
-            const data = await response.json();
-            return {data,status:response.status}
-        }catch(error)
-        {
-            if(error.message === "Failed to fetch")
-                throw new Error("Oops! We're having trouble connecting to the server. Please try again later.");
-            else
-                throw new Error(error.message)
-        }
-    },
-    isVerificationCodeValid:async(email,code) => {
-            try{
-                const response = await fetch(`${baseUrl}auth/confirm-verification`,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email,
-                    code
-                })
-            });
-            
-            return response.status === 200
-            }catch(error)
-        {
-            if(error.message === "Failed to fetch")
-                throw new Error("Oops! We're having trouble connecting to the server. Please try again later.");
-            else
-                throw new Error(error.message)
-        }
-    },
-    registerUniversityAmin:async({firstName,lastName,password,email}) => {
-            try{
-                const response = await fetch(`${baseUrl}auth/register/university-admin`,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    firstName,
-                    lastName,
-                    password,
-                    email,
-                })
-            })
-            const data = await response.json();
-            return {data, status:response.status};
-            }catch(error)
-        {
-            if(error.message === "Failed to fetch")
-                throw new Error("Oops! We're having trouble connecting to the server. Please try again later.");
-            else
-                throw new Error(error.message)
-        }
-    },
-    login : async({email, password})=>{
-        try{
-            const response = await fetch(`${baseUrl}auth/login`,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email,
-                    password
-                })
-            });
-            const data = await response.json();
-            return {data, status : response.status};
-        }catch(error){
-            if(error.message === "Failed to fetch")
-                throw new Error("Oops! We're having trouble connecting to the server. Please try again later.");
-            else
-                throw new Error(error.message)
-        }
-    },
-    forgotPassword : async(email)=>{
-        try{
-            const response = await fetch(`${baseUrl}auth/forgot-password`,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email
-                })
-            });
-            return { status : response.status }
-        }catch(error){
-            if(error.message === "Failed to fetch")
-                throw new Error("Oops! We're having trouble connecting to the server. Please try again later.");
-            else
-                throw new Error(error.message)
-        }
-    },
-    resetPassword : async({email, token, newPassword})=>{
-        try{
-            const response = await fetch(`${baseUrl}auth/reset-password`,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email,
-                    token,
-                    newPassword
-                })
-            });
-            if(response.status === 400){
-                throw new Error("Your password reset link is invalid or has expired. ");
-            }
-            
-        }catch(error){
-            if(error.message === "Failed to fetch")
-                throw new Error("Oops! We're having trouble connecting to the server. Please try again later.");
-            else
-                throw new Error(error.message)
-        }
-    },
-       deactivateUser:async(userId) => {
-        
-            try{
-                const response = await fetch(`${baseUrl}auth/users/${userId}/deactivate`,
-            {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
+  isEmailAlreadyExists: async (email) => {
+    const { data } = await apiFetch(`${baseUrl}auth/check-email/${email}`);
+    return data.exists;
+  },
 
-            const data = await response.json();
+  sendVerificationCode: async (email) =>
+    await apiFetch(`${baseUrl}auth/verify-email`, {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    }),
 
-            return { data , status : response.status }
-            }catch(error)
-        {
-            if(error.message === "Failed to fetch")
-                throw new Error("Oops! We're having trouble connecting to the server. Please try again later.");
-            else
-                throw new Error(error.message)
-        }
-    },
-   
-    
-    
+  isVerificationCodeValid: async (email, code) => {
+    const { status } = await apiFetch(`${baseUrl}auth/confirm-verification`, {
+      method: "POST",
+      body: JSON.stringify({ email, code }),
+    });
+    return status === 200;
+  },
 
+  registerUniversityAmin: async ({ firstName, lastName, password, email }) =>
+    await apiFetch(`${baseUrl}auth/register/university-admin`, {
+      method: "POST",
+      body: JSON.stringify({ firstName, lastName, password, email }),
+    }),
+
+login: async ({ email, password }) =>
+  await apiFetch(`${baseUrl}auth/login`, {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
+    skipAuthRedirect: true,   // ← don't auto-redirect on wrong credentials
+  }),
+
+  forgotPassword: async (email) =>
+    await apiFetch(`${baseUrl}auth/forgot-password`, {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    }),
+
+  resetPassword: async ({ email, token, newPassword }) => {
+    const { status } = await apiFetch(`${baseUrl}auth/reset-password`, {
+      method: "POST",
+      body: JSON.stringify({ email, token, newPassword }),
+    });
+
+    if (status === 400) {
+      throw new Error(
+        "Your password reset link is invalid or has expired. "
+      );
+    }
+  },
+
+  deactivateUser: async (userId) =>
+    await apiFetch(`${baseUrl}auth/users/${userId}/deactivate`, {
+      method: "PATCH",
+    }),
 };
+
 export default authApi;

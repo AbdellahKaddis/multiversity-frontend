@@ -6,12 +6,17 @@ import { useSelector } from "react-redux";
 import styles2 from "./ProgramCourses.module.css";
 import AddCourseToProgramModal from "./AddCourseToProgramModal";
 import Swal from "sweetalert2";
+
 const ProgramCourses = ({ program, currentFaculty, onBack }) => {
   const [assignedCourses, setAssignedCourses] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+
   const faculty =
     currentFaculty || useSelector((state) => state.faculty.faculty);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const getAllAssignedCourses = async (facultyId, programId) => {
+    setLoading(true);
     try {
       const { data, status } =
         await programCourseApi.getAllAssignedCoursesForProgram(
@@ -19,10 +24,11 @@ const ProgramCourses = ({ program, currentFaculty, onBack }) => {
           programId
         );
       if (status === 200) setAssignedCourses(data);
-      else
-        toast.error("Something went wrong we could not load assigned courses.");
+      else toast.error("Something went wrong we could not load assigned courses.");
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -35,9 +41,15 @@ const ProgramCourses = ({ program, currentFaculty, onBack }) => {
       toast.error(error.message);
     }
   };
+
   useEffect(() => {
-    getAllAssignedCourses(faculty.id, program.id);
-  }, []);
+    if (faculty?.id && program?.id) {
+      getAllAssignedCourses(faculty.id, program.id);
+    } else {
+      setLoading(false);
+    }
+  }, [faculty?.id, program?.id]);
+
   const save = async (submissionData) => {
     submissionData.programId = program.id;
 
@@ -45,6 +57,7 @@ const ProgramCourses = ({ program, currentFaculty, onBack }) => {
 
     await getAllAssignedCourses(faculty.id, program.id);
   };
+
   const handleDelete = (e, programCourse) => {
     e.stopPropagation();
     Swal.fire({
@@ -73,6 +86,7 @@ const ProgramCourses = ({ program, currentFaculty, onBack }) => {
       }
     });
   };
+
   return (
     <div className={styles.page}>
       {isModalOpen && (
@@ -87,6 +101,7 @@ const ProgramCourses = ({ program, currentFaculty, onBack }) => {
         />
       )}
       <ToastContainer position="top-right" autoClose={3000} />
+
       {/* Header */}
       <div className={styles.header}>
         <button className={styles.backButton} onClick={onBack}>
@@ -114,49 +129,56 @@ const ProgramCourses = ({ program, currentFaculty, onBack }) => {
             ➕ Add Course
           </button>
         </div>
+
         <div className={styles.tableContainer}>
-          <table className={styles.table}>
-            <thead className={styles.tableHeader}>
-              <tr>
-                <th>Code</th>
-                <th>Name</th>
-                <th>Semester</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {assignedCourses.map((programCourse) => (
-                <tr key={programCourse.id} className={styles.tableRow}>
-                  <td className={styles.codeCell}>
-                    <span className={styles.facultyCode}>
-                      {programCourse.course.code}
-                    </span>
-                  </td>
-                  <td className={styles.nameCell}>
-                    <div className={styles.facultyName}>
-                      {programCourse.course.title}
-                    </div>
-                  </td>
-                  <td>{programCourse.semester}</td>
-                  <td>
-                    <button
-                      className={styles.deleteButton}
-                      onClick={(e) => handleDelete(e, programCourse)}
-                      title="Delete Course"
-                    >
-                      🗑️
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {assignedCourses.length === 0 && (
+          {loading ? (
+            <div className={styles.loadingState}>
+              <div className={styles.spinner} />
+              <p>Loading assigned courses…</p>
+            </div>
+          ) : assignedCourses.length === 0 ? (
             <div className={styles.emptyState}>
               <div className={styles.emptyIcon}>🏛️</div>
               <h3>No courses found</h3>
               <p>Add a new course.</p>
             </div>
+          ) : (
+            <table className={styles.table}>
+              <thead className={styles.tableHeader}>
+                <tr>
+                  <th>Code</th>
+                  <th>Name</th>
+                  <th>Semester</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {assignedCourses.map((programCourse) => (
+                  <tr key={programCourse.id} className={styles.tableRow}>
+                    <td className={styles.codeCell}>
+                      <span className={styles.facultyCode}>
+                        {programCourse.course?.code ?? "—"}
+                      </span>
+                    </td>
+                    <td className={styles.nameCell}>
+                      <div className={styles.facultyName}>
+                        {programCourse.course?.title ?? "—"}
+                      </div>
+                    </td>
+                    <td>{programCourse.semester ?? "—"}</td>
+                    <td>
+                      <button
+                        className={styles.deleteButton}
+                        onClick={(e) => handleDelete(e, programCourse)}
+                        title="Delete Course"
+                      >
+                        🗑️
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
       </div>

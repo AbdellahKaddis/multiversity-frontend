@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Button } from '../common/Button';
-import { UNIVERSITY } from '../../data/data';
+
 import { useSelector } from 'react-redux';
 import { NavLink, useNavigate, useParams } from 'react-router-dom';
+import { apiUrl } from '../../utils/apiUrl';
 
 export function Header({ onSearchOpen, onPortalClick }) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -57,7 +58,7 @@ export function Header({ onSearchOpen, onPortalClick }) {
             style={{ cursor: 'pointer' }}
           >
             <div className="header-logo">
-              {UNIVERSITY.logo}
+              {<img src={apiUrl(university?.logoUrl)}/>}
             </div>
 
             <span className="header-brand-name">
@@ -139,7 +140,7 @@ export function Header({ onSearchOpen, onPortalClick }) {
 
         <div className="header-brand">
           <div className="header-logo">
-            {UNIVERSITY.logo}
+            {<img src={apiUrl(university?.logoUrl)}/>}
           </div>
 
           <span className="header-brand-name">

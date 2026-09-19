@@ -16,9 +16,9 @@ const formatDate = (dateString) => {
 };
 
 const STUDENT_STATUS = {
-  Enrolled:  { className: "statusApproved",   label: "Enrolled" },
-  Graduated: { className: "statusAccepted",   label: "Graduated" },
-  Withdrawn: { className: "statusDeclined",   label: "Withdrawn" },
+  Enrolled:  { className: "statusApproved",    label: "Enrolled" },
+  Graduated: { className: "statusAccepted",    label: "Graduated" },
+  Withdrawn: { className: "statusDeclined",    label: "Withdrawn" },
   Suspended: { className: "statusUnderReview", label: "Suspended" },
 };
 
@@ -27,10 +27,12 @@ const StudentList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("name");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [loading, setLoading] = useState(true);
 
   const faculty = useSelector((state) => state.faculty.faculty);
 
   const getStudents = async (facultyId) => {
+    setLoading(true);
     try {
       const { data, status } = await applicantApi.getApplicants({
         universityId: faculty.universityId,
@@ -41,6 +43,8 @@ const StudentList = () => {
       else toast.error("Something went wrong we could not load students.");
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -73,7 +77,11 @@ const StudentList = () => {
   });
 
   useEffect(() => {
-    if (faculty?.id) getStudents(faculty.id);
+    if (faculty?.id) {
+      getStudents(faculty.id);
+    } else {
+      setLoading(false);
+    }
   }, [faculty?.id]);
 
   return (
@@ -129,66 +137,71 @@ const StudentList = () => {
       </div>
 
       <div className={styles.tableContainer}>
-        <table className={styles.table}>
-          <thead className={styles.tableHeader}>
-            <tr>
-              <th>Student Number</th>
-              <th>Full Name</th>
-              <th>CIN</th>
-              <th>Massar Code</th>
-              <th>Phone</th>
-              <th>Enrolled On</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedStudents.map((student) => {
-              const meta = STUDENT_STATUS[student.status] ?? {
-                className: "statusSubmitted",
-                label: student.status,
-              };
-
-              return (
-                <tr key={student.id} className={styles.tableRow}>
-                  <td className={styles.codeCell}>
-                    <span className={styles.facultyCode}>
-                      {student.studentNumber ?? "—"}
-                    </span>
-                  </td>
-
-                  <td className={styles.nameCell}>
-                    <div className={styles.facultyName}>
-                      {student.fullName ?? "—"}
-                    </div>
-                  </td>
-
-                  <td>{student.cin ?? "—"}</td>
-
-                  <td>
-                    <span className={styles.facultyCode}>
-                      {student.massarCode ?? "—"}
-                    </span>
-                  </td>
-
-                  <td>{student.phone ?? "—"}</td>
-
-                  <td>{formatDate(student.enrolledAt)}</td>
-
-                  <td>
-                    <span className={styles[meta.className]}>{meta.label}</span>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-
-        {sortedStudents.length === 0 && (
+        {loading ? (
+          <div className={styles.loadingState}>
+            <div className={styles.spinner} />
+            <p>Loading students…</p>
+          </div>
+        ) : sortedStudents.length === 0 ? (
           <div className={styles.emptyState}>
             <div className={styles.emptyIcon}>🎓</div>
             <h3>No students found</h3>
             <p>Try adjusting your search or filters.</p>
           </div>
+        ) : (
+          <table className={styles.table}>
+            <thead className={styles.tableHeader}>
+              <tr>
+                <th>Student Number</th>
+                <th>Full Name</th>
+                <th>CIN</th>
+                <th>Massar Code</th>
+                <th>Phone</th>
+                <th>Enrolled On</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedStudents.map((student) => {
+                const meta = STUDENT_STATUS[student.status] ?? {
+                  className: "statusSubmitted",
+                  label: student.status,
+                };
+
+                return (
+                  <tr key={student.id} className={styles.tableRow}>
+                    <td className={styles.codeCell}>
+                      <span className={styles.facultyCode}>
+                        {student.studentNumber ?? "—"}
+                      </span>
+                    </td>
+
+                    <td className={styles.nameCell}>
+                      <div className={styles.facultyName}>
+                        {student.fullName ?? "—"}
+                      </div>
+                    </td>
+
+                    <td>{student.cin ?? "—"}</td>
+
+                    <td>
+                      <span className={styles.facultyCode}>
+                        {student.massarCode ?? "—"}
+                      </span>
+                    </td>
+
+                    <td>{student.phone ?? "—"}</td>
+
+                    <td>{formatDate(student.enrolledAt)}</td>
+
+                    <td>
+                      <span className={styles[meta.className]}>{meta.label}</span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         )}
       </div>
     </>

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Button } from '../common/Button';
-import { UNIVERSITY } from '../../data/data';
 
-export function ContactSection({ onNavigate }) {
+
+export function ContactSection() {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
 
@@ -11,7 +11,28 @@ export function ContactSection({ onNavigate }) {
     setSubmitted(true);
     setTimeout(() => setSubmitted(false), 3000);
   };
-
+const UNIVERSITY = {
+  name: 'MultiVersity',
+  logo: 'MV',
+  primaryColor: '#0a2a44',
+  secondaryColor: '#b8860b',
+  description: 'A global leader in higher education, fostering innovation and academic excellence since 1965.',
+  mission: 'To empower learners with knowledge, critical thinking, and a global perspective.',
+  vision: 'To be a beacon of knowledge and innovation, shaping the future of education worldwide.',
+  history: 'Founded in 1965, MultiVersity has grown from a small liberal arts college to a world‑class research university with over 30,000 students from 120 countries.',
+  address: '123 University Avenue, Academic City, AC 10001',
+  phone: '+1 (555) 234‑5678',
+  email: 'info@multiversity.edu',
+  website: 'www.multiversity.edu',
+  officeHours: 'Mon–Fri, 8:00 AM – 6:00 PM',
+  social: {
+    facebook: '#',
+    twitter: '#',
+    instagram: '#',
+    linkedin: '#',
+    youtube: '#',
+  },
+};
   return (
     <section className="section section-alt">
       <div className="container">

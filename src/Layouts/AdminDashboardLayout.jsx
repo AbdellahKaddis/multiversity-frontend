@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styles from "../components/UniversityAdmin/style.module.css";
 import {
@@ -8,217 +8,212 @@ import {
   FaBook,
   FaUserGraduate,
   FaChalkboardTeacher,
-  FaCalendarAlt,
   FaCog,
-  FaSearch,
   FaBell,
   FaChevronDown,
-  FaArrowUp,
-  FaArrowDown,
-  FaMapMarkerAlt,
   FaScroll,
+  FaUniversity,
+  FaSignOutAlt,
+  FaUser,
 } from "react-icons/fa";
-import { TfiAnnouncement } from "react-icons/tfi";
-import { MdAssignmentAdd } from "react-icons/md";
-import { RiCalendarScheduleFill } from "react-icons/ri";
-import { CgProfile } from "react-icons/cg";
-import { PiStudentFill } from "react-icons/pi";
+
 import universityApi from "../api/universityApi";
 import facultyApi from "../api/facultyApi";
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import { set } from "../features/university/universitySlice";
 import { toast } from "react-toastify";
 import { setFaculty } from "../features/faculty/facultySlice";
 import professorApi from "../api/professorApi";
 import { setProfessor } from "../features/Professor/professorSlice";
 import applicantApi from "../api/applicantApi";
-import {setApplicant} from "../features/applicant/applicantSlice";
+import { setApplicant } from "../features/applicant/applicantSlice";
+import { apiUrl } from "../utils/apiUrl";
+import { logout } from "../features/auth/authSlice";
+
 const AdminDashboardLayout = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const auth = useSelector((state) => state.auth);
+  const university = useSelector((state) => state.university.university);
+  const faculty = useSelector((state) => state.faculty.faculty);
+
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [notifications, setNotifications] = useState(3);
-  const dispatch = useDispatch();
-  // Navigation items
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState("Dashboard");
+  const [contextLoading, setContextLoading] = useState(true);
+
+  const dropdownRef = useRef(null);
+
+  // ── Click outside + Escape to close dropdown ──
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    const handleEscape = (e) => {
+      if (e.key === "Escape") setDropdownOpen(false);
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
+
+  // ── Fetch context (university / faculty / professor / applicant) by role ──
+  const loadUserContext = async (user) => {
+    try {
+      switch (user.role) {
+        case "UniversityAdmin": {
+          const { data, status } = await universityApi.getUniversityByAdminId(user.id);
+          if (status === 200) dispatch(set(data));
+          break;
+        }
+        case "Dean": {
+          const { data, status } = await facultyApi.getFacultyByDeanId(user.id);
+          if (status === 200) dispatch(setFaculty(data));
+          break;
+        }
+        case "Professor": {
+          const { data, status } = await professorApi.getProfessor(user.id);
+          if (status === 200) {
+            dispatch(setFaculty(data.faculty));
+            dispatch(setProfessor(data));
+          }
+          break;
+        }
+        case "Applicant":
+        case "Student": {
+          const { data, status } = await applicantApi.getApplicant(user.id);
+          if (status === 200) dispatch(setApplicant(data));
+          break;
+        }
+        default:
+          break;
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  useEffect(() => {
+    if (!auth.user?.role) {
+      setContextLoading(false);
+      return;
+    }
+    const load = async () => {
+      setContextLoading(true);
+      try {
+        await loadUserContext(auth.user);
+      } finally {
+        setContextLoading(false);
+      }
+    };
+    load();
+  }, [auth.user?.role]);
+
+  const handleLogout = () => {
+    dispatch(logout());
+    const path = window.location.pathname;
+    navigate(path.startsWith("/student") ? "/login/student" : "/login");
+  };
+
+  const clearNotifications = () => setNotifications(0);
+
+  // ── Nav items by role ──
   const navItems = [
     {
       role: "UniversityAdmin",
       navItems: [
-        {
-          name: "Dashboard",
-          icon: <FaTachometerAlt />,
-          link: "/university-admin-dashboard",
-        },
-        {
-          name: "Faculties",
-          icon: <FaGraduationCap />,
-          link: "/university-admin-dashboard/faculties",
-        },
-        {
-          name: "Degrees",
-          icon: <FaScroll />,
-          link: "university-admin-dashboard/degrees",
-        },
-        { name: "Settings", icon: <FaCog />, link: "" },
+        { name: "Dashboard", icon: <FaTachometerAlt />, link: "/university-admin-dashboard" },
+        { name: "Faculties", icon: <FaGraduationCap />, link: "/university-admin-dashboard/faculties" },
+        { name: "Degrees", icon: <FaScroll />, link: "/university-admin-dashboard/degrees" },
+        { name: "University Profile", icon: <FaUniversity />, link: "/university-admin-dashboard/university-profile" },
       ],
     },
     {
       role: "Dean",
       navItems: [
-        {
-          name: "Dashboard",
-          icon: <FaTachometerAlt />,
-          link: "faculty-dean-dashboard",
-        },
-        {
-          name: "Departments",
-          icon: <FaBuilding />,
-          link: "faculty-dean-dashboard/departments",
-        },
-        {
-          name: "Programs",
-          icon: <FaGraduationCap />,
-          link: "faculty-dean-dashboard/programs",
-        },
-        {
-          name: "Courses",
-          icon: <FaBook />,
-          link: "faculty-dean-dashboard/courses",
-        },
-        { name: "Professors", icon: <FaChalkboardTeacher />,  link: "faculty-dean-dashboard/professors", },
-        { name: "Professor Courses", icon: <FaChalkboardTeacher />,  link: "faculty-dean-dashboard/professorCourses", },
-        { name: "Admissions", icon: <FaBook />,  link: "faculty-dean-dashboard/admissions", },
-          { name: "Applications", icon: <FaBook />,  link: "faculty-dean-dashboard/applications", },
-             { name: "Enrollments", icon: <FaBook />,  link: "faculty-dean-dashboard/enrollments", },
-          
-        { name: "Students", icon: <FaUserGraduate />,  link: "faculty-dean-dashboard/students",  },
-
-        { name: "Schedule", icon: <FaCalendarAlt /> },
-        { name: "Settings", icon: <FaCog /> },
+        { name: "Dashboard", icon: <FaTachometerAlt />, link: "/faculty-dean-dashboard" },
+        { name: "Departments", icon: <FaBuilding />, link: "/faculty-dean-dashboard/departments" },
+        { name: "Programs", icon: <FaGraduationCap />, link: "/faculty-dean-dashboard/programs" },
+        { name: "Courses", icon: <FaBook />, link: "/faculty-dean-dashboard/courses" },
+        { name: "Professors", icon: <FaChalkboardTeacher />, link: "/faculty-dean-dashboard/professors" },
+        { name: "Professor Courses", icon: <FaChalkboardTeacher />, link: "/faculty-dean-dashboard/professorCourses" },
+        { name: "Admissions", icon: <FaBook />, link: "/faculty-dean-dashboard/admissions" },
+        { name: "Applications", icon: <FaBook />, link: "/faculty-dean-dashboard/applications" },
+        { name: "Enrollments", icon: <FaBook />, link: "/faculty-dean-dashboard/enrollments" },
+        { name: "Students", icon: <FaUserGraduate />, link: "/faculty-dean-dashboard/students" },
       ],
     },
     {
-      role : "Professor",
-      navItems : [
-       
-                 {
-          name: "My Courses",
-          icon: <FaBook />,
-          link: "professor-dashboard/courses",
-        },
-         
-                 {
-          name: "Grades",
-          icon: <FaTachometerAlt />,// not found
-          link: "/professor-dashboard/grades",
-        }
-      ]
+      role: "Professor",
+      navItems: [
+        { name: "My Courses", icon: <FaBook />, link: "/professor-dashboard/courses" },
+        { name: "Grades", icon: <FaTachometerAlt />, link: "/professor-dashboard/grades" },
+      ],
     },
-      {
-      role : "Applicant",
-      navItems : [
-         {
-          name: "Applications",
-          icon: <FaTachometerAlt />,
-          link: "/student/applications",
-        },]},
-        {
-      role : "Student",
-      navItems : [
-         {
-          name: "Applications",
-          icon: <FaTachometerAlt />,
-          link: "/student/applications",
-        },]}
+    {
+      role: "Applicant",
+      navItems: [
+        { name: "Applications", icon: <FaTachometerAlt />, link: "/student/applications" },
+      ],
+    },
+    {
+      role: "Student",
+      navItems: [
+        { name: "Applications", icon: <FaTachometerAlt />, link: "/student/applications" },
+        { name: "Grades", icon: <FaTachometerAlt />, link: "/student/grades" },
+      ],
+    },
   ];
-  const getCurrentUserNavItems = () =>
-    navItems.find((item) => item.role === auth.user.role);
 
-  const clearNotifications = () => {
-    setNotifications(0);
-  };
+  const currentNavItems = navItems.find((n) => n.role === auth.user?.role)?.navItems ?? [];
 
-  const auth = useSelector((state) => state.auth);
-  const university = useSelector((state) => state.university.university);
-  const faculty = useSelector((state) => state.faculty.faculty);
-  const getUniversityForAdmin = async () => {
-    try {
-      const { data, status } = await universityApi.getUniversityByAdminId(
-        auth.user.id
-      );
-      if (status === 200) {
-        console.log(data);
-        dispatch(set(data));
-      }
-    } catch (error) {
-      toast.error(error.message);
-    }
-  };
-  const getFacultyForDean = async () => {
-    try {
-      const { data, status } = await facultyApi.getFacultyByDeanId(
-        auth.user.id
-      );
-      if (status === 200) {
-        console.log(data);
-        dispatch(setFaculty(data));
-      }
-    } catch (error) {
-      toast.error(error.message);
-    }
-  };
-    const getProfessor = async () => {
-    try {
-      const { data, status } = await professorApi.getProfessor(auth.user.id);
-      if (status === 200) {
-        dispatch(setFaculty(data.faculty));
-        dispatch(setProfessor(data))
-      }
-    } catch (error) {
-      toast.error(error.message);
-    }
-  };
-  const getApplicant = async () => {
-    try {
-      const { data, status } = await applicantApi.getApplicant(auth.user.id);
-      if (status === 200) {
-        dispatch(setApplicant(data));
-      }
-    } catch (error) {
-      toast.error(error.message);
-    }
-  };
-  useEffect(() => {
-    switch (auth.user.role) {
-      case "UniversityAdmin":
-        getUniversityForAdmin();
-        break;
-      case "Dean":
-        getFacultyForDean();
-        break;
-      case "Professor":
-        getProfessor();
-        break;
-      case "Applicant":
-        getApplicant();
-        break;
-      case "Student":
-        getApplicant();
-        break;
-    }
-  }, []);
-const [activeSection, setActiveSection] = useState('Dashboard')
+  const initials = (() => {
+    const name = auth.user?.name ?? "";
+    const parts = name.trim().split(/\s+/);
+    const first = parts[0]?.[0] ?? "";
+    const second = parts[1]?.[0] ?? "";
+    return (first + second).toUpperCase() || "?";
+  })();
+
+  // ── Loading gate — no dashboard until we know who the user is ──
+  if (!auth.user) {
+    return (
+      <div className={styles["dashboard-container"]}>
+        <div className={styles["main-content"]}>
+          <div className={styles["dashboard-content"]}>
+            <div style={{ textAlign: "center", padding: "80px 20px" }}>
+              <div className={styles.spinner} />
+              <p>Loading dashboard…</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles["dashboard-container"]}>
       {/* Sidebar */}
-      <div
-        className={`${styles.sidebar} ${sidebarOpen ? "" : styles.collapsed}`}
-      >
+      <div className={`${styles.sidebar} ${sidebarOpen ? "" : styles.collapsed}`}>
         <div className={styles["sidebar-header"]}>
-          <div className={styles["university-logo"]}>U</div>
+          <div className={styles["university-logo"]}>
+            {university?.logoUrl ? (
+              <img src={apiUrl(university.logoUrl)} alt="University Logo" />
+            ) : (
+              <div className={styles.photoPlaceholder}>📷</div>
+            )}
+          </div>
           {sidebarOpen && (
-            <h1>
-              {university?.name}
-              {faculty?.name}
-            </h1>
+            <h1>{university?.name ?? faculty?.name ?? ""}</h1>
           )}
           <button
             className={styles["toggle-btn"]}
@@ -229,14 +224,14 @@ const [activeSection, setActiveSection] = useState('Dashboard')
         </div>
 
         <div className={styles["nav-links"]}>
-          {getCurrentUserNavItems().navItems.map((item, index) => (
+          {currentNavItems.map((item, index) => (
             <Link
               key={index}
               className={`${styles["nav-item"]} ${
                 item.name === activeSection ? styles.active : ""
               }`}
-              to={`${item.link}`}
-              onClick={e => setActiveSection(item.name)}
+              to={item.link}
+              onClick={() => setActiveSection(item.name)}
             >
               <div className={styles["nav-icon"]}>{item.icon}</div>
               {sidebarOpen && <span>{item.name}</span>}
@@ -246,13 +241,9 @@ const [activeSection, setActiveSection] = useState('Dashboard')
       </div>
 
       {/* Main Content */}
-      <div
-        className={`${styles["main-content"]} ${
-          sidebarOpen ? "" : styles["sidebar-collapsed"]
-        }`}
-      >
+      <div className={`${styles["main-content"]} ${sidebarOpen ? "" : styles["sidebar-collapsed"]}`}>
         {/* Header */}
-        <div className={styles["header"]}>
+        <div className={styles.header}>
           <div className={styles["header-left"]}>
             <button
               className={styles["mobile-menu-btn"]}
@@ -260,10 +251,6 @@ const [activeSection, setActiveSection] = useState('Dashboard')
             >
               ☰
             </button>
-            <div className={styles["search-bar"]}>
-              <FaSearch className={styles["search-icon"]} />
-              <input type="text" placeholder="Search..." />
-            </div>
           </div>
 
           <div className={styles["user-actions"]}>
@@ -277,25 +264,72 @@ const [activeSection, setActiveSection] = useState('Dashboard')
               )}
             </div>
 
-            <div className={styles["user-profile"]}>
-              <div className={styles["user-avatar"]}>
-                {auth.user.name[0].toUpperCase() +
-                  auth.user.name.split(" ")[1][0].toUpperCase()}
-              </div>
+            <div
+              className={styles["user-profile"]}
+              ref={dropdownRef}
+              onClick={() => setDropdownOpen((v) => !v)}
+            >
+              <div className={styles["user-avatar"]}>{initials}</div>
+
               <div className={styles["user-info"]}>
                 <h4>{auth.user.name}</h4>
                 <p>{auth.user.role}</p>
               </div>
 
-              <FaChevronDown className={styles["dropdown-icon"]} />
+              <FaChevronDown
+                className={`${styles["dropdown-icon"]} ${
+                  dropdownOpen ? styles["dropdown-icon-open"] : ""
+                }`}
+              />
+
+              {dropdownOpen && (
+                <div className={styles["user-dropdown"]}>
+                  <div className={styles["dropdown-header"]}>
+                    <span className={styles["dropdown-name"]}>{auth.user.name}</span>
+                    <span className={styles["dropdown-role"]}>{auth.user.role}</span>
+                  </div>
+
+                  <div className={styles["dropdown-divider"]} />
+
+                  <button
+                    className={styles["dropdown-item"]}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDropdownOpen(false);
+                    }}
+                  >
+                    <FaUser className={styles["dropdown-item-icon"]} />
+                    My Profile
+                  </button>
+
+                  <button
+                    className={`${styles["dropdown-item"]} ${styles["dropdown-item-danger"]}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDropdownOpen(false);
+                      handleLogout();
+                    }}
+                  >
+                    <FaSignOutAlt className={styles["dropdown-item-icon"]} />
+                    Log out
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
         {/* Dashboard Content */}
         <div className={styles["dashboard-content"]}>
-          <Outlet />
-          {/* Footer  */}
+          {contextLoading ? (
+            <div style={{ textAlign: "center", padding: "80px 20px" }}>
+              <div className={styles.spinner} />
+              <p>Loading…</p>
+            </div>
+          ) : (
+            <Outlet />
+          )}
+
           <div className={styles.footer}>
             <p>© 2025 MutiVersity. All rights reserved.</p>
           </div>

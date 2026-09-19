@@ -1,45 +1,46 @@
 import React, { useEffect, useState } from 'react';
 import styles from './FacultiesList.module.css';
 import { toast } from 'react-toastify';
-import departmentApi from '../../api/departmentApi';
 import DepartmentsList from '../Departments/departmentsList';
 import academicProgramApi from '../../api/academicProgramApi';
 import ProgramsList from '../Programs/ProgramsList';
+import applicantApi from '../../api/applicantApi';
+import { useSelector } from 'react-redux';
 
 const FacultyDetail = ({ faculty, onBack }) => {
   const [activeTab, setActiveTab] = useState('overview');
+  const university = useSelector(state => state.university.university);
   const [statistics, setStatistics] = useState({
-    numberOfDepartments : 0,
-    numberOfPrograms : 0
+    numberOfDepartments: 0,
+    numberOfPrograms: 0,
+    numberOfStudents: 0,
   });
-  // const [departments, setDepartments] = useState([]);
-  // const [programs, setPrograms] = useState([]);
-  // const getDepartments = async(facultyId)=>{
-  //   try{
-  //     const { data, status } = await departmentApi.getDepartments(facultyId);
-  //     if(status === 200)
-  //       setDepartments(data);
-  //     else
-  //       toast.error("Something went wrong we could not load departments.");
-  //     }catch(error){
-  //       toast.error(error.message);
-  //     }
-  //   };
-  // const getPrograms = async(facultyId=null, departmentId=null)=>{
-  //   try{
-  //     const { data, status } = await academicProgramApi.getAcademicPrograms(facultyId, departmentId);
-  //     if(status === 200)
-  //       setPrograms(data);
-  //     else
-  //       toast.error("Something went wrong we could not load programs.");
-  //     }catch(error){
-  //       toast.error(error.message);
-  //     }
-  //   };
-  useEffect(()=>{
-    // getDepartments(faculty.id);
-    // getPrograms(faculty.id);
-  },[]);
+
+  const getFacultyStatistics = async (universityId, facultyId) => {
+    try {
+      const [programsRes, studentsRes] = await Promise.all([
+        academicProgramApi.getAcademicPrograms(facultyId),
+        applicantApi.getApplicants({ universityId, facultyId, status: 'Enrolled' }),
+      ]);
+
+      setStatistics((prev) => ({
+        ...prev,
+        numberOfPrograms:
+          programsRes.status === 200 ? programsRes.data.length : 0,
+        numberOfStudents:
+          studentsRes.status === 200 ? studentsRes.data.length : 0,
+      }));
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  useEffect(() => {
+    if (faculty?.id && university?.id) {
+      getFacultyStatistics(university?.id, faculty.id);
+    }
+  }, [faculty?.id, university?.id]);
+
   return (
     <div className={styles.detailContainer}>
       {/* Header */}
@@ -53,7 +54,7 @@ const FacultyDetail = ({ faculty, onBack }) => {
             <div>
               <h1 className={styles.facultyDetailTitle}>{faculty.name}</h1>
               <div className={styles.facultyMeta}>
-                <span>{faculty.university}</span>
+                <span>{university.name}</span>
                 <span>•</span>
                 <span>{faculty.city}</span>
                 <span>•</span>
@@ -70,30 +71,25 @@ const FacultyDetail = ({ faculty, onBack }) => {
 
       {/* Tabs */}
       <div className={styles.tabs}>
-        <button 
+        <button
           className={`${styles.tab} ${activeTab === 'overview' ? styles.activeTab : ''}`}
           onClick={() => setActiveTab('overview')}
         >
           Overview
         </button>
-        <button 
+        <button
           className={`${styles.tab} ${activeTab === 'departments' ? styles.activeTab : ''}`}
           onClick={() => setActiveTab('departments')}
         >
-          Departments ({statistics.numberOfDepartments})
+          Departments ({faculty.departmentCount})
         </button>
-        <button 
+        <button
           className={`${styles.tab} ${activeTab === 'programs' ? styles.activeTab : ''}`}
           onClick={() => setActiveTab('programs')}
         >
           Programs ({statistics.numberOfPrograms})
         </button>
-        <button 
-          className={`${styles.tab} ${activeTab === 'staff' ? styles.activeTab : ''}`}
-          onClick={() => setActiveTab('staff')}
-        >
-          Staff & Students
-        </button>
+
       </div>
 
       {/* Tab Content */}
@@ -105,17 +101,17 @@ const FacultyDetail = ({ faculty, onBack }) => {
               <div className={styles.deanInfo}>
                 <div className={styles.deanAvatar}>👨‍🏫</div>
                 <div>
-                  <div className={styles.deanName}>{faculty.dean}</div>
+                  <div className={styles.deanName}>{faculty.deanName}</div>
                   <div className={styles.deanTitle}>Dean of Faculty</div>
                 </div>
               </div>
             </div>
-            
+
             <div className={styles.overviewCard}>
               <h3>Quick Stats</h3>
               <div className={styles.statsList}>
                 <div className={styles.statItem}>
-                  <span className={styles.statValue}>{statistics.numberOfDepartments}</span>
+                  <span className={styles.statValue}>{faculty.departmentCount}</span>
                   <span className={styles.statLabel}>Departments</span>
                 </div>
                 <div className={styles.statItem}>
@@ -123,12 +119,12 @@ const FacultyDetail = ({ faculty, onBack }) => {
                   <span className={styles.statLabel}>Programs</span>
                 </div>
                 <div className={styles.statItem}>
-                  <span className={styles.statValue}>{faculty.students}</span>
+                  <span className={styles.statValue}>{statistics.numberOfStudents}</span>
                   <span className={styles.statLabel}>Students</span>
                 </div>
               </div>
             </div>
-            
+
             <div className={styles.overviewCard}>
               <h3>Contact Information</h3>
               <div className={styles.contactInfo}>
@@ -142,47 +138,20 @@ const FacultyDetail = ({ faculty, onBack }) => {
 
         {activeTab === 'departments' && (
           <div className={styles.sectionContent}>
-            {/* <div className={styles.sectionHeader}>
-              <h3>Departments</h3>
-              <button className={styles.primaryButton}>+ Add Department</button>
-            </div>
-            <p>Department management interface would go here...</p> */}
-            <DepartmentsList currentFaculty={faculty} setStatistics={setStatistics}/>
+            <DepartmentsList currentFaculty={faculty} setStatistics={setStatistics} />
           </div>
         )}
 
         {activeTab === 'programs' && (
           <div className={styles.sectionContent}>
-            {/* <div className={styles.sectionHeader}>
-              <h3>Academic Programs</h3>
-              <button className={styles.primaryButton}>+ Add Program</button>
-            </div>
-            <p>Program management interface would go here...</p> */}
-            <ProgramsList currentFaculty={faculty}/>
+            <ProgramsList currentFaculty={faculty} />
           </div>
         )}
 
-        {activeTab === 'staff' && (
-          <div className={styles.sectionContent}>
-            <h3>Staff & Students Overview</h3>
-            <div className={styles.staffStats}>
-              <div className={styles.staffStat}>
-                <div className={styles.staffNumber}>{faculty.students}</div>
-                <div className={styles.staffLabel}>Total Students</div>
-              </div>
-              <div className={styles.staffStat}>
-                <div className={styles.staffNumber}>45</div>
-                <div className={styles.staffLabel}>Faculty Members</div>
-              </div>
-              <div className={styles.staffStat}>
-                <div className={styles.staffNumber}>23</div>
-                <div className={styles.staffLabel}>Staff Members</div>
-              </div>
-            </div>
-          </div>
-        )}
+      
       </div>
     </div>
   );
 };
+
 export default FacultyDetail;

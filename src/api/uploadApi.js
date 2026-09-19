@@ -1,48 +1,35 @@
 import { baseUrl } from "./authApi";
-
+import { apiFetch } from "../utils/apiClient";
 
 const uploadApi = {
- uploadPhoto: async (photo) => {
-    const photoFd = new FormData();
-    photoFd.append("file", photo);
-    try {
-      const response = await fetch(`${baseUrl}uploads/photo`, {
-        method: "POST",
-        headers: {},
-        body: photoFd,
-      });
-
-      if (!response.ok) throw new Error("Upload failed");
-  const { url } = await response.json();
-  return url; 
-    } catch (error) {
-      if (error.message === "Failed to fetch")
-        throw new Error(
-          "Oops! We're having trouble connecting to the server. Please try again later."
-        );
-      else throw new Error(error.message);
-    }
+  uploadPhoto: async (photo) => {
+    const fd = new FormData();
+    fd.append("file", photo);
+    const { data } = await apiFetch(`${baseUrl}uploads/photo`, {
+      method: "POST",
+      body: fd,
+    });
+    return data.url;
   },
-  uploadPdf: async (pdf) => {
-    const pdfFd = new FormData();
-    pdfFd.append("file", pdf);
-    try {
-      const response = await fetch(`${baseUrl}uploads/pdf`, {
-        method: "POST",
-        headers: {},
-        body: pdfFd,
-      });
 
-      if (!response.ok) throw new Error("Upload failed");
-  const { url } = await response.json();
-  return url; 
-    } catch (error) {
-      if (error.message === "Failed to fetch")
-        throw new Error(
-          "Oops! We're having trouble connecting to the server. Please try again later."
-        );
-      else throw new Error(error.message);
-    }
+  uploadPdf: async (pdf) => {
+    const fd = new FormData();
+    fd.append("file", pdf);
+    const { data } = await apiFetch(`${baseUrl}uploads/pdf`, {
+      method: "POST",
+      body: fd,
+    });
+    return data.url;
+  },
+
+  uploadUniversityLogo: async (file) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    const { data } = await apiFetch(`${baseUrl}uploads/university-logo`, {
+      method: "POST",
+      body: fd,
+    });
+    return data.url;
   },
 };
 export default uploadApi;

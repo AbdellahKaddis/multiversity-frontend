@@ -6,17 +6,20 @@ import Swal from "sweetalert2";
 import academicProgramApi from "../../api/academicProgramApi";
 import AddAndUpdateProgramModal from "./AddAndUpdateProgramModal";
 import ProgramCourses from "../ProgramCourses/ProgramCourses";
+
 const ProgramsList = ({ currentFaculty }) => {
   const [programs, setPrograms] = useState([]);
-  const faculty =
-    currentFaculty || useSelector((state) => state.faculty.faculty);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("name");
-  const [isAddAndUpdateProgramModalOpen, setIsAddAndUpdateProgramModalOpen] =
-    useState(false);
+  const [isAddAndUpdateProgramModalOpen, setIsAddAndUpdateProgramModalOpen] = useState(false);
   const [programToBeUpdated, setProgramToBeUpdated] = useState(null);
   const [selectedProgram, setSelectedProgram] = useState(null);
-  const getPrograms = async (facultyId = null, departmentId = null,universityId=null) => {
+  const [loading, setLoading] = useState(true);
+
+  const faculty = currentFaculty || useSelector((state) => state.faculty.faculty);
+
+  const getPrograms = async (facultyId = null, departmentId = null, universityId = null) => {
+    setLoading(true);
     try {
       const { data, status } = await academicProgramApi.getAcademicPrograms(
         facultyId,
@@ -27,8 +30,11 @@ const ProgramsList = ({ currentFaculty }) => {
       else toast.error("Something went wrong we could not load programs.");
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      setLoading(false);
     }
   };
+
   const createProgram = async (data) => {
     try {
       const { status } = await academicProgramApi.createAcademicProgram(data);
@@ -38,6 +44,7 @@ const ProgramsList = ({ currentFaculty }) => {
       toast.error(error.message);
     }
   };
+
   const updateProgram = async (data) => {
     data.programId = programToBeUpdated.id;
     try {
@@ -53,22 +60,22 @@ const ProgramsList = ({ currentFaculty }) => {
 
   const filteredPrograms = programs.filter(
     (program) =>
-      program.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      program.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      program.degreeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      program.departmentName.toLowerCase().includes(searchTerm.toLowerCase())
+      program.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      program.code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      program.degreeName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      program.departmentName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const sortedPrograms = [...filteredPrograms].sort((a, b) => {
     switch (sortBy) {
       case "code":
-        return a.code.localeCompare(b.code);
+        return (a.code ?? "").localeCompare(b.code ?? "");
       case "degreeName":
-        return a.degreeName.localeCompare(b.degreeName);
+        return (a.degreeName ?? "").localeCompare(b.degreeName ?? "");
       case "departmentName":
-        return a.departmentName.localeCompare(b.departmentName);
+        return (a.departmentName ?? "").localeCompare(b.departmentName ?? "");
       default:
-        return a.name.localeCompare(b.name);
+        return (a.name ?? "").localeCompare(b.name ?? "");
     }
   });
 
@@ -91,9 +98,7 @@ const ProgramsList = ({ currentFaculty }) => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const { status } = await academicProgramApi.deleteAcademicProgram(
-            program.id
-          );
+          const { status } = await academicProgramApi.deleteAcademicProgram(program.id);
           if (status === 204) {
             toast.success("Program has been deleted successfully!");
             await getPrograms(faculty.id);
@@ -106,27 +111,38 @@ const ProgramsList = ({ currentFaculty }) => {
       }
     });
   };
+
   const save = async (submissionData) => {
     if (programToBeUpdated === null) await createProgram(submissionData);
     else await updateProgram(submissionData);
 
     await getPrograms(faculty.id);
   };
+
   useEffect(() => {
-    getPrograms(faculty.id);
-  }, []);
+    if (faculty?.id) {
+      getPrograms(faculty.id);
+    } else {
+      setLoading(false);
+    }
+  }, [faculty?.id]);
+
   const formatDescription = (description) => {
+    if (!description) return "No description";
     if (description.length > 25) return description.slice(0, 25) + "...";
-    else return description;
+    return description;
   };
+
   if (selectedProgram) {
     return (
       <ProgramCourses
         program={selectedProgram}
+        currentFaculty={faculty}
         onBack={() => setSelectedProgram(null)}
       />
     );
   }
+
   return (
     <>
       {isAddAndUpdateProgramModalOpen && (
@@ -142,6 +158,7 @@ const ProgramsList = ({ currentFaculty }) => {
         />
       )}
       <ToastContainer position="top-right" autoClose={3000} />
+
       <div className={styles.header}>
         <div className={styles.headerMain}>
           <h1 className={styles.pageTitle}>Programs</h1>
@@ -181,68 +198,75 @@ const ProgramsList = ({ currentFaculty }) => {
       </div>
 
       <div className={styles.tableContainer}>
-        <table className={styles.table}>
-          <thead className={styles.tableHeader}>
-            <tr>
-              <th>Program Name</th>
-              <th>Code</th>
-              <th>Degree</th>
-              <th>Department </th>
-              <th>Duration (Years) </th>
-              <th>Description</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedPrograms.map((program) => (
-              <tr
-                key={program.id}
-                className={styles.tableRow}
-                onClick={() => setSelectedProgram(program)}
-              >
-                <td className={styles.nameCell}>
-                  <div className={styles.facultyName}>{program.name}</div>
-                </td>
-                <td className={styles.codeCell}>
-                  <span className={styles.facultyCode}>{program.code}</span>
-                </td>
-                <td>{program.degreeName}</td>
-                <td>{program.departmentName}</td>
-                <td>{program.durationInYears}</td>
-                <td className={!program.description ? styles.notAssigned : ""}>
-                  {program.description === null
-                    ? "No description"
-                    : formatDescription(program.description)}
-                </td>
-                <td>
-                  <div className={styles.actionButtons}>
-                    <button
-                      className={styles.editButton}
-                      onClick={(e) => handleEdit(program, e)}
-                      title="Edit Program"
-                    >
-                      ✏️
-                    </button>
-                    <button
-                      className={styles.deleteButton}
-                      onClick={(e) => handleDelete(program, e)}
-                      title="Delete Program"
-                    >
-                      🗑️
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {sortedPrograms.length === 0 && (
+        {loading ? (
+          <div className={styles.loadingState}>
+            <div className={styles.spinner} />
+            <p>Loading programs…</p>
+          </div>
+        ) : sortedPrograms.length === 0 ? (
           <div className={styles.emptyState}>
             <div className={styles.emptyIcon}>🏛️</div>
             <h3>No programs found</h3>
             <p>Try adjusting your search or add a new program.</p>
           </div>
+        ) : (
+          <table className={styles.table}>
+            <thead className={styles.tableHeader}>
+              <tr>
+                <th>Program Name</th>
+                <th>Code</th>
+                <th>Degree</th>
+                <th>Department</th>
+                <th>Duration (Years)</th>
+                <th>Description</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedPrograms.map((program) => (
+                <tr
+                  key={program.id}
+                  className={styles.tableRow}
+                  onClick={() => setSelectedProgram(program)}
+                >
+                  <td className={styles.nameCell}>
+                    <div className={styles.facultyName}>{program.name}</div>
+                  </td>
+
+                  <td className={styles.codeCell}>
+                    <span className={styles.facultyCode}>{program.code}</span>
+                  </td>
+
+                  <td>{program.degreeName}</td>
+                  <td>{program.departmentName}</td>
+                  <td>{program.durationInYears}</td>
+
+                  <td className={!program.description ? styles.notAssigned : ""}>
+                    {formatDescription(program.description)}
+                  </td>
+
+                  <td>
+                    <div className={styles.actionButtons}>
+                      <button
+                        className={styles.editButton}
+                        onClick={(e) => handleEdit(program, e)}
+                        title="Edit Program"
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        className={styles.deleteButton}
+                        onClick={(e) => handleDelete(program, e)}
+                        title="Delete Program"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
     </>

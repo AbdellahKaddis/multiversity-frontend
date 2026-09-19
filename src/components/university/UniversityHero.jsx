@@ -2,14 +2,15 @@
 import React from 'react';
 import { Button } from '../common/Button';
 import { useSelector } from 'react-redux';
+import { useNavigate, useParams } from 'react-router-dom';
 
-export function UniversityHero({ onNavigate }) {
+export function UniversityHero() {
   const university = useSelector(
     (state) => state.university.university
   );
-
+const {universityId} = useParams()
   const currentYear = new Date().getFullYear();
-
+const navigate = useNavigate()
   const yearsOfExcellence = university?.yearEstablished
     ? currentYear - university.yearEstablished
     : null;
@@ -51,7 +52,7 @@ export function UniversityHero({ onNavigate }) {
             <Button
               variant="primary"
               size="lg"
-              onClick={() => onNavigate('programs')}
+              onClick={() => navigate(`/universities/${universityId}/programs`)}
             >
               Explore Programs
             </Button>
@@ -59,7 +60,7 @@ export function UniversityHero({ onNavigate }) {
             <Button
               variant="secondary"
               size="lg"
-              onClick={() => onNavigate('admissions')}
+              onClick={() => navigate(`/universities/${universityId}/admissions`)}
             >
               Admissions
             </Button>

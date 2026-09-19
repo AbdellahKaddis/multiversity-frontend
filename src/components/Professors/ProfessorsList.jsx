@@ -14,43 +14,53 @@ const ProfessorsList = () => {
   const [sortBy, setSortBy] = useState("firstName");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [professorToBeUpdated, setProfessorToBeUpdated] = useState(null);
-   const [selectedProfessor, setSelectedProfessor] = useState(null);
+  const [selectedProfessor, setSelectedProfessor] = useState(null);
+  const [loading, setLoading] = useState(true);
+
   const faculty = useSelector((state) => state.faculty.faculty);
+
   const getAllProfessors = async (facultyId) => {
+    setLoading(true);
     try {
       const { data, status } = await professorApi.getAllProfessors(facultyId);
       if (status === 200) setProfessors(data);
       else toast.error("Something went wrong we could not load professors.");
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      setLoading(false);
     }
   };
+
   const createProfessor = async (data) => {
     data.facultyId = faculty.id;
     try {
       const { status } = await professorApi.createProfessor(data);
-      if (status === 201) 
-        {
-          const { status } = await authApi.forgotPassword(data.email);
-          if(status === 200)
-            toast.success("Professor created successfully. Password setup email sent.");
-          else
-            toast.warn('Professor created, but the password setup email could not be sent.')
-        }
-      else toast.error(data.message);
+      if (status === 201) {
+        const { status: emailStatus } = await authApi.forgotPassword(data.email);
+        if (emailStatus === 200)
+          toast.success("Professor created successfully. Password setup email sent.");
+        else
+          toast.warn("Professor created, but the password setup email could not be sent.");
+      } else {
+        toast.error("Something went wrong.");
+      }
     } catch (error) {
       toast.error(error.message);
     }
   };
+
   const updateProfessor = async (data) => {
     data.professorId = professorToBeUpdated.id;
-      data.facultyId = faculty.id;
+    data.facultyId = faculty.id;
     try {
-      const { data , status } = await professorApi.updateProfessor(data);
+      const { data: responseData, status } = await professorApi.updateProfessor(data);
       if (status === 204) {
         toast.success("Professor updated successfully!");
         setProfessorToBeUpdated(null);
-      } else toast.error(data.message);
+      } else {
+        toast.error(responseData?.message ?? "Something went wrong.");
+      }
     } catch (error) {
       toast.error(error.message);
     }
@@ -58,19 +68,19 @@ const ProfessorsList = () => {
 
   const filteredProfessors = professors.filter(
     (professor) =>
-      professor.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      professor.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      professor.departmentName.toLowerCase().includes(searchTerm.toLowerCase())
+      professor.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      professor.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      professor.departmentName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const sortedProfessors = [...filteredProfessors].sort((a, b) => {
     switch (sortBy) {
       case "lastName":
-        return a.lastName.localeCompare(b.lastName);
-        case "department":
-        return a.departmentName.localeCompare(b.departmentName);
+        return (a.lastName ?? "").localeCompare(b.lastName ?? "");
+      case "department":
+        return (a.departmentName ?? "").localeCompare(b.departmentName ?? "");
       default:
-        return a.firstName.localeCompare(b.firstName);
+        return (a.firstName ?? "").localeCompare(b.firstName ?? "");
     }
   });
 
@@ -94,37 +104,43 @@ const ProfessorsList = () => {
       if (result.isConfirmed) {
         try {
           const { data, status } = await professorApi.deleteProfessor(professor.id);
-          
-          
           if (status === 204) {
             toast.success("Professor has been deleted successfully!");
             await getAllProfessors(faculty.id);
+          } else {
+            toast.error(data?.message ?? "Something went wrong.");
           }
-          else
-            toast.error(data.Message);
         } catch (error) {
           toast.error(error.message);
         }
       }
     });
   };
+
   const save = async (submissionData) => {
     if (professorToBeUpdated === null) await createProfessor(submissionData);
     else await updateProfessor(submissionData);
 
     await getAllProfessors(faculty.id);
   };
+
   useEffect(() => {
-    getAllProfessors(faculty.id);
-  }, []);
-   
+    if (faculty?.id) {
+      getAllProfessors(faculty.id);
+    } else {
+      setLoading(false);
+    }
+  }, [faculty?.id]);
+
   if (selectedProfessor) {
     return (
       <ProfessorCourseList
         professor={selectedProfessor}
         onBack={() => setSelectedProfessor(null)}
       />
-    );}
+    );
+  }
+
   return (
     <>
       {isModalOpen && (
@@ -139,6 +155,7 @@ const ProfessorsList = () => {
         />
       )}
       <ToastContainer position="top-right" autoClose={3000} />
+
       <div className={styles.header}>
         <div className={styles.headerMain}>
           <h1 className={styles.pageTitle}>Professors</h1>
@@ -155,7 +172,7 @@ const ProfessorsList = () => {
             <span className={styles.searchIcon}>🔍</span>
             <input
               type="text"
-              placeholder="Search professors by firstName, lastName, department"
+              placeholder="Search professors by first name, last name, department"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className={styles.searchInput}
@@ -168,77 +185,92 @@ const ProfessorsList = () => {
               onChange={(e) => setSortBy(e.target.value)}
               className={styles.filterSelect}
             >
-              <option value="firstName">Sort by FirstName</option>
-              <option value="lastName">Sort by LastName</option>
-               <option value="department">Sort by Department</option>
+              <option value="firstName">Sort by First Name</option>
+              <option value="lastName">Sort by Last Name</option>
+              <option value="department">Sort by Department</option>
             </select>
           </div>
         </div>
       </div>
 
       <div className={styles.tableContainer}>
-        <table className={styles.table}>
-          <thead className={styles.tableHeader}>
-            <tr>
-              <th>Cin</th>
-              <th>First Name</th>
-              <th>Last Name</th>
-              <th>Grade</th>
-              <th>Department Name</th>
-              <th>Is Department Head</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedProfessors.map((professor) => (
-              <tr key={professor.id} className={styles.tableRow} onClick={() => setSelectedProfessor(professor)}>
-                <td className={professor.cin ? styles.codeCell : ""}>
-                  <span className={professor.cin ?styles.facultyCode : ""}>{professor.cin || "Not set"}</span>
-                </td>
-
-                <td className={styles.nameCell}>
-                  <div className={styles.facultyName}>
-                    {professor.firstName}
-                  </div>
-                </td>
-                <td className={styles.nameCell}>
-                  <div className={styles.facultyName}>{professor.lastName}</div>
-                </td>
-                <td>{professor.grade}</td>
-                 <td className={styles.nameCell}>
-                                  <div className={styles.facultyName}>{professor.departmentName}</div>
-                                </td>
-                <td>{professor.isDepartmentHead ? "Yes" : "No"}</td>
-
-                <td>
-                  <div className={styles.actionButtons}>
-                    <button
-                      className={styles.editButton}
-                      onClick={(e) => handleEdit(professor, e)}
-                      title="Edit Professor"
-                    >
-                      ✏️
-                    </button>
-                    <button
-                      className={styles.deleteButton}
-                      onClick={(e) => handleDelete(professor, e)}
-                      title="Delete Professor"
-                    >
-                      🗑️
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {sortedProfessors.length === 0 && (
+        {loading ? (
+          <div className={styles.loadingState}>
+            <div className={styles.spinner} />
+            <p>Loading professors…</p>
+          </div>
+        ) : sortedProfessors.length === 0 ? (
           <div className={styles.emptyState}>
             <div className={styles.emptyIcon}>🏛️</div>
             <h3>No professors found</h3>
             <p>Try adjusting your search or add a new professor.</p>
           </div>
+        ) : (
+          <table className={styles.table}>
+            <thead className={styles.tableHeader}>
+              <tr>
+                <th>Cin</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Grade</th>
+                <th>Department</th>
+                <th>Head</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedProfessors.map((professor) => (
+                <tr
+                  key={professor.id}
+                  className={styles.tableRow}
+                  onClick={() => setSelectedProfessor(professor)}
+                >
+                  <td className={professor.cin ? styles.codeCell : ""}>
+                    <span className={professor.cin ? styles.facultyCode : ""}>
+                      {professor.cin || "Not set"}
+                    </span>
+                  </td>
+
+                  <td className={styles.nameCell}>
+                    <div className={styles.facultyName}>{professor.firstName}</div>
+                  </td>
+
+                  <td className={styles.nameCell}>
+                    <div className={styles.facultyName}>{professor.lastName}</div>
+                  </td>
+
+                  <td>{professor.grade ?? "—"}</td>
+
+                  <td className={styles.nameCell}>
+                    <div className={styles.facultyName}>
+                      {professor.departmentName ?? "—"}
+                    </div>
+                  </td>
+
+                  <td>{professor.isDepartmentHead ? "Yes" : "No"}</td>
+
+                  <td>
+                    <div className={styles.actionButtons}>
+                      <button
+                        className={styles.editButton}
+                        onClick={(e) => handleEdit(professor, e)}
+                        title="Edit Professor"
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        className={styles.deleteButton}
+                        onClick={(e) => handleDelete(professor, e)}
+                        title="Delete Professor"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
     </>

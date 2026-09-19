@@ -23,8 +23,8 @@ const STATUS_OPTIONS = [
   "Waitlisted",
   "Approved",
   "Rejected",
- "Accepted" ,
-  "Declined" 
+  "Accepted",
+  "Declined",
 ];
 
 const STATUS_META = {
@@ -44,11 +44,13 @@ const ApplicationsReviewList = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedApplication, setSelectedApplication] = useState(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const faculty = useSelector((state) => state.faculty.faculty);
-   const auth = useSelector((state) => state.auth);
+  const auth = useSelector((state) => state.auth);
 
   const getAllApplications = async (facultyId) => {
+    setLoading(true);
     try {
       const { data, status } = await applicationApi.getApplications({
         facultyId,
@@ -57,35 +59,40 @@ const ApplicationsReviewList = () => {
       else toast.error("Something went wrong — we could not load applications.");
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
+  const handleChangeStatus = async (application, newStatus) => {
+    if (newStatus === application.status) return;
 
- const handleChangeStatus = async (application, newStatus) => {
-  if (newStatus === application.status) return;
+    const { isConfirmed } = await Swal.fire({
+      title: "Confirm status change",
+      html: `Change status from <strong>${STATUS_META[application.status]?.label ?? application.status}</strong>
+             to <strong>${STATUS_META[newStatus]?.label ?? newStatus}</strong>?`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#16A085",
+      cancelButtonColor: "#95A5A6",
+      confirmButtonText: "Yes, update",
+    });
 
-  const { isConfirmed } = await Swal.fire({
-    title: "Confirm status change",
-    html: `Change status from <strong>${STATUS_META[application.status]?.label ?? application.status}</strong>
-           to <strong>${STATUS_META[newStatus]?.label ?? newStatus}</strong>?`,
-    icon: "question",
-    showCancelButton: true,
-    confirmButtonColor: "#16A085",
-    cancelButtonColor: "#95A5A6",
-    confirmButtonText: "Yes, update",
-  });
+    if (!isConfirmed) return;
 
-  if (!isConfirmed) return;
-
-  try {
-    await applicationApi.updateApplicationStatus(application.id, newStatus, auth.user.id);
-    toast.success(`Status updated to ${STATUS_META[newStatus]?.label ?? newStatus}.`);
-    await getAllApplications(faculty.id);
-    setIsDetailsOpen(false);
-  } catch (error) {
-    toast.error(error.message);
-  }
-};
+    try {
+      await applicationApi.updateApplicationStatus(
+        application.id,
+        newStatus,
+        auth.user.id
+      );
+      toast.success(`Status updated to ${STATUS_META[newStatus]?.label ?? newStatus}.`);
+      await getAllApplications(faculty.id);
+      setIsDetailsOpen(false);
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
 
   const handleDelete = (application, e) => {
     e.stopPropagation();
@@ -144,7 +151,7 @@ const ApplicationsReviewList = () => {
       case "status":
         return (a.status ?? "").localeCompare(b.status ?? "");
       case "grade":
-        return (b.grade ?? 0) - (a.grade ?? 0); // descending — highest first
+        return (b.grade ?? 0) - (a.grade ?? 0);
       case "submittedAt":
       default:
         return new Date(b.submittedAt ?? 0) - new Date(a.submittedAt ?? 0);
@@ -153,6 +160,7 @@ const ApplicationsReviewList = () => {
 
   useEffect(() => {
     if (faculty?.id) getAllApplications(faculty.id);
+    else setLoading(false);
   }, [faculty?.id]);
 
   return (
@@ -221,96 +229,102 @@ const ApplicationsReviewList = () => {
       </div>
 
       <div className={styles.tableContainer}>
-        <table className={styles.table}>
-          <thead className={styles.tableHeader}>
-            <tr>
-              <th>Applicant</th>
-              <th>Program</th>
-              <th>Grade</th>
-              <th>Bac</th>
-              <th>Submitted</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedApplications.map((application) => {
-              const meta = STATUS_META[application.status] ?? {
-                className: "statusSubmitted",
-                label: application.status,
-              };
-
-              return (
-                <tr
-                  key={application.id}
-                  className={styles.tableRow}
-                  onClick={() => handleRowClick(application)}
-                >
-
-                  <td className={styles.nameCell}>
-                    <div className={styles.facultyName}>
-                      {application.applicantFullName ?? "—"}
-                    </div>
-                  </td>
-
-                  <td className={styles.nameCell}>
-                    <div className={styles.facultyName}>
-                      {application.programName ?? "—"}
-                    </div>
-                  </td>
-
-                  <td>{application.grade ?? "—"}</td>
-
-                  <td>
-                    {application.bacSerie
-                      ? `${application.bacSerie} · ${application.bacYear ?? ""}`
-                      : "—"}
-                  </td>
-
-                  <td>{formatDate(application.submittedAt)}</td>
-
-                  <td>
-                    <span className={styles[meta.className]}>
-                      {meta.label}
-                    </span>
-                  </td>
-
-                  <td>
-                    <div className={styles.actionButtons}>
-                    <select
-      className={`${styles.statusSelect} ${styles[meta.selectClass]}`}
-      value={application.status}
-      onClick={(e) => e.stopPropagation()}
-      onChange={(e) => handleChangeStatus(application, e.target.value)}
-      title="Change status"
-    >
-      {STATUS_OPTIONS.map((s) => (
-        <option key={s} value={s}>
-          {STATUS_META[s]?.label ?? s}
-        </option>
-      ))}
-    </select>
-                      <button
-                        className={styles.deleteButton}
-                        onClick={(e) => handleDelete(application, e)}
-                        title="Delete application"
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-
-        {sortedApplications.length === 0 && (
+        {loading ? (
+          <div className={styles.loadingState}>
+            <div className={styles.spinner} />
+            <p>Loading applications…</p>
+          </div>
+        ) : sortedApplications.length === 0 ? (
           <div className={styles.emptyState}>
             <div className={styles.emptyIcon}>🏛️</div>
             <h3>No applications found</h3>
             <p>Try adjusting your search or filters.</p>
           </div>
+        ) : (
+          <table className={styles.table}>
+            <thead className={styles.tableHeader}>
+              <tr>
+                <th>Applicant</th>
+                <th>Program</th>
+                <th>Grade</th>
+                <th>Bac</th>
+                <th>Submitted</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedApplications.map((application) => {
+                const meta = STATUS_META[application.status] ?? {
+                  className: "statusSubmitted",
+                  label: application.status,
+                };
+
+                return (
+                  <tr
+                    key={application.id}
+                    className={styles.tableRow}
+                    onClick={() => handleRowClick(application)}
+                  >
+                    <td className={styles.nameCell}>
+                      <div className={styles.facultyName}>
+                        {application.applicantFullName ?? "—"}
+                      </div>
+                    </td>
+
+                    <td className={styles.nameCell}>
+                      <div className={styles.facultyName}>
+                        {application.programName ?? "—"}
+                      </div>
+                    </td>
+
+                    <td>{application.grade ?? "—"}</td>
+
+                    <td>
+                      {application.bacSerie
+                        ? `${application.bacSerie} · ${application.bacYear ?? ""}`
+                        : "—"}
+                    </td>
+
+                    <td>{formatDate(application.submittedAt)}</td>
+
+                    <td>
+                      <span className={styles[meta.className]}>
+                        {meta.label}
+                      </span>
+                    </td>
+
+                    <td>
+                      <div className={styles.actionButtons}>
+                        <select
+                          className={`${styles.statusSelect} ${styles[meta.selectClass]}`}
+                          value={application.status}
+                          onClick={(e) => e.stopPropagation()}
+                          onChange={(e) =>
+                            handleChangeStatus(application, e.target.value)
+                          }
+                          title="Change status"
+                        >
+                          {STATUS_OPTIONS.map((s) => (
+                            <option key={s} value={s}>
+                              {STATUS_META[s]?.label ?? s}
+                            </option>
+                          ))}
+                        </select>
+                        <button
+                          className={styles.deleteButton}
+                          onClick={(e) => handleDelete(application, e)}
+                          title="Delete application"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         )}
       </div>
     </>

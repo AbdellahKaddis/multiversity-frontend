@@ -5,30 +5,39 @@ import { useSelector } from "react-redux";
 import { toast, ToastContainer } from "react-toastify";
 import AddAndUpdateDepartmentModal from "./AddAndUpdateDepartmentModal";
 import Swal from "sweetalert2";
+
 const DepartmentsList = ({ currentFaculty, setStatistics }) => {
   const [departments, setDepartments] = useState([]);
-  const faculty =
-    currentFaculty || useSelector((state) => state.faculty.faculty);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("name");
-  const [
-    isAddAndUpdateDepartmentModalOpen,
-    setIsAddAndUpdateDepartmentModalOpen,
-  ] = useState(false);
+  const [isAddAndUpdateDepartmentModalOpen, setIsAddAndUpdateDepartmentModalOpen] = useState(false);
   const [departmentToBeUpdated, setDepartmentToBeUpdated] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const faculty = currentFaculty || useSelector((state) => state.faculty.faculty);
+
   const getDepartments = async (facultyId) => {
+    setLoading(true);
     try {
       const { data, status } = await departmentApi.getDepartments(facultyId);
-      if (status === 200) setDepartments(data);
-      else toast.error("Something went wrong we could not load departments.");
+      if (status === 200) {
+        setDepartments(data);
+        if (setStatistics) {
+          setStatistics((prev) => ({
+            ...prev,
+            numberOfDepartments: data.length,
+          }));
+        }
+      } else {
+        toast.error("Something went wrong we could not load departments.");
+      }
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      setLoading(false);
     }
-    setStatistics((prev) => ({
-      ...prev,
-      numberOfDepartments: departments.length,
-    }));
   };
+
   const createDepartment = async (data) => {
     try {
       const { status } = await departmentApi.createDepartment(data);
@@ -38,6 +47,7 @@ const DepartmentsList = ({ currentFaculty, setStatistics }) => {
       toast.error(error.message);
     }
   };
+
   const updateDepartment = async (data) => {
     data.departmentId = departmentToBeUpdated.id;
     try {
@@ -53,16 +63,16 @@ const DepartmentsList = ({ currentFaculty, setStatistics }) => {
 
   const filteredDepartments = departments.filter(
     (department) =>
-      department.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      department.code.toLowerCase().includes(searchTerm.toLowerCase())
+      department.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      department.code?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const sortedDepartments = [...filteredDepartments].sort((a, b) => {
     switch (sortBy) {
       case "code":
-        return a.code.localeCompare(b.code);
+        return (a.code ?? "").localeCompare(b.code ?? "");
       default:
-        return a.name.localeCompare(b.name);
+        return (a.name ?? "").localeCompare(b.name ?? "");
     }
   });
 
@@ -90,7 +100,7 @@ const DepartmentsList = ({ currentFaculty, setStatistics }) => {
             department.id
           );
           if (status === 204) {
-            toast.success("department has been deleted successfully!");
+            toast.success("Department has been deleted successfully!");
             await getDepartments(faculty.id);
           } else {
             toast.error("Something went wrong!");
@@ -101,6 +111,7 @@ const DepartmentsList = ({ currentFaculty, setStatistics }) => {
       }
     });
   };
+
   const save = async (submissionData) => {
     submissionData.facultyId = faculty.id;
 
@@ -109,13 +120,21 @@ const DepartmentsList = ({ currentFaculty, setStatistics }) => {
 
     await getDepartments(faculty.id);
   };
+
   useEffect(() => {
-    getDepartments(faculty.id);
-  }, []);
+    if (faculty?.id) {
+      getDepartments(faculty.id);
+    } else {
+      setLoading(false);
+    }
+  }, [faculty?.id]);
+
   const formatDescription = (description) => {
+    if (!description) return "No description";
     if (description.length > 25) return description.slice(0, 25) + "...";
-    else return description;
+    return description;
   };
+
   return (
     <>
       {isAddAndUpdateDepartmentModalOpen && (
@@ -130,6 +149,7 @@ const DepartmentsList = ({ currentFaculty, setStatistics }) => {
         />
       )}
       <ToastContainer position="top-right" autoClose={3000} />
+
       <div className={styles.header}>
         <div className={styles.headerMain}>
           <h1 className={styles.pageTitle}>Departments</h1>
@@ -167,72 +187,71 @@ const DepartmentsList = ({ currentFaculty, setStatistics }) => {
       </div>
 
       <div className={styles.tableContainer}>
-        <table className={styles.table}>
-          <thead className={styles.tableHeader}>
-            <tr>
-              <th>Department Name</th>
-              <th>Code</th>
-              <th>Department Head</th>
-              <th>Email</th>
-              <th>Description</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedDepartments.map((department) => (
-              <tr
-                key={department.id}
-                className={styles.tableRow}
-                // onClick={() => setSelectedFaculty(faculty)}
-              >
-                <td className={styles.nameCell}>
-                  <div className={styles.facultyName}>{department.name}</div>
-                </td>
-                <td className={styles.codeCell}>
-                  <span className={styles.facultyCode}>{department.code}</span>
-                </td>
-                                 <td className={styles.nameCell}>
-                  <div className={styles.facultyName}>{department.departmentHead || "Not set"}</div>
-                </td>       
-                <td className={!department.email ? styles.notAssigned : ""}>
-                  {department.email === null ? "Not set" : department.email}
-                </td>
-                <td
-                  className={!department.description ? styles.notAssigned : ""}
-                >
-                  {department.description === null
-                    ? "No description"
-                    : formatDescription(department.description)}
-                </td>
-                <td>
-                  <div className={styles.actionButtons}>
-                    <button
-                      className={styles.editButton}
-                      onClick={(e) => handleEdit(department, e)}
-                      title="Edit Department"
-                    >
-                      ✏️
-                    </button>
-                    <button
-                      className={styles.deleteButton}
-                      onClick={(e) => handleDelete(department, e)}
-                      title="Delete Department"
-                    >
-                      🗑️
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {sortedDepartments.length === 0 && (
+        {loading ? (
+          <div className={styles.loadingState}>
+            <div className={styles.spinner} />
+            <p>Loading departments…</p>
+          </div>
+        ) : sortedDepartments.length === 0 ? (
           <div className={styles.emptyState}>
             <div className={styles.emptyIcon}>🏛️</div>
             <h3>No departments found</h3>
             <p>Try adjusting your search or add a new department.</p>
           </div>
+        ) : (
+          <table className={styles.table}>
+            <thead className={styles.tableHeader}>
+              <tr>
+                <th>Department Name</th>
+                <th>Code</th>
+                <th>Department Head</th>
+                <th>Email</th>
+                <th>Description</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedDepartments.map((department) => (
+                <tr key={department.id} className={styles.tableRow}>
+                  <td className={styles.nameCell}>
+                    <div className={styles.facultyName}>{department.name}</div>
+                  </td>
+                  <td className={styles.codeCell}>
+                    <span className={styles.facultyCode}>{department.code}</span>
+                  </td>
+                  <td className={styles.nameCell}>
+                    <div className={styles.facultyName}>
+                      {department.departmentHead || "Not set"}
+                    </div>
+                  </td>
+                  <td className={!department.email ? styles.notAssigned : ""}>
+                    {department.email ?? "Not set"}
+                  </td>
+                  <td className={!department.description ? styles.notAssigned : ""}>
+                    {formatDescription(department.description)}
+                  </td>
+                  <td>
+                    <div className={styles.actionButtons}>
+                      <button
+                        className={styles.editButton}
+                        onClick={(e) => handleEdit(department, e)}
+                        title="Edit Department"
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        className={styles.deleteButton}
+                        onClick={(e) => handleDelete(department, e)}
+                        title="Delete Department"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
     </>

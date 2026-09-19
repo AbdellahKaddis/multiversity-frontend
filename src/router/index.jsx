@@ -1,6 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 import SignUp from "../components/auth/SignUp";
-import Home from "../components/Home/Home";
+
 import Login from "../components/auth/Login";
 import UniversityAdminDashboard from "../components/UniversityAdmin/UniversityAdminDashboard";
 import ResetPassword from "../components/auth/ResetPassword";
@@ -12,19 +12,17 @@ import ProgramsList from "../components/Programs/ProgramsList";
 import DegreesList from "../components/Degrees/DegreesList";
 import CoursesList from "../components/Courses/CoursesList";
 import ProfessorsList from "../components/Professors/ProfessorsList";
-import ProfessorDashboard from "../components/Professors/ProfessorDashboard";
+
 import ProfessorCourseList from "../components/ProfessorCourses/ProfessorCourseList";
-import Universityentrypoint from "../Universityentrypoint";
 import { FacultyDetailsPage } from "../pages/FacultyDetailsPage";
 import { HomePage } from "../pages/HomePage";
 import { FacultiesPage } from "../pages/FacultiesPage";
-import { SearchPage } from "../pages/SearchPage";
 import { ContactPage } from "../pages/ContactPage";
 
 import { AdmissionsPage } from "../pages/AdmissionsPage";
 import { ProfessorDetailsPage } from "../pages/ProfessorDetailsPage";
 import { ProfessorsPage } from "../pages/ProfessorsPage";
-import { CourseDetailsPage } from "../pages/CourseDetailsPage";
+
 import { ProgramDetailsPage } from "../pages/ProgramDetailsPage";
 import { ProgramsPage } from "../pages/ProgramsPage";
 import AdmissionsList from "../components/Admissions/AdmissionsList";
@@ -34,10 +32,16 @@ import ApplicationsList from "../components/Applications/ApplicationsList";
 import ApplicationsReviewList from "../components/Applications/ApplicationsReviewList";
 import EnrollmentList from "../components/Enrollments/EnrollmentList";
 import StudentList from "../components/Students/StudentList";
+import GradeEntryPage from "../components/Grades/GradeEntryPage";
+import ProfessorCourses from "../components/Professors/ProfessorCoursesList";
+import StudentGradesPage from "../components/Students/StudentGradesPage ";
+import UniversityProfilePage from "../components/UniversityAdmin/UniversityProfilePage";
+import UniversityLayout from "../Layouts/UniversityLayout";
+import LandingPage from "../components/Home/LandingPage";
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <Home />,
+    element: <LandingPage />,
   },
   {
     path: "/signup",
@@ -94,10 +98,7 @@ export const router = createBrowserRouter([
         path: "/faculty-dean-dashboard/professorCourses",
         element: <ProfessorCourseList />,
       },
-      {
-        path: "/professor-dashboard",
-        element: <ProfessorDashboard />,
-      },
+    
       { path: "/faculty-dean-dashboard/admissions",
         element: <AdmissionsList />,
       },
@@ -118,6 +119,20 @@ export const router = createBrowserRouter([
          { path: "/faculty-dean-dashboard/students",
         element: <StudentList />,
       },
+       {
+      path: "/professor-dashboard/grades",
+      element: <GradeEntryPage />,
+    },
+     { path: "/professor-dashboard/courses",
+        element: <ProfessorCourses />,
+      },
+       { path: "/student/grades",
+        element: <StudentGradesPage />,
+      },
+      {
+         path:"/university-admin-dashboard/university-profile",
+        element:<UniversityProfilePage />
+      }
     ],
   },
   {
@@ -127,7 +142,7 @@ export const router = createBrowserRouter([
    
   {
   path: "/universities/:universityId",
-  element: <Universityentrypoint />,
+  element: <UniversityLayout />,
   children: [
     {
       index: true,
@@ -164,11 +179,8 @@ export const router = createBrowserRouter([
     {
       path: "/universities/:universityId/contact",
       element: <ContactPage />,
-    },
-    {
-      path: "/universities/:universityId/search",
-      element: <SearchPage />,
-    },
+    }
+       
   ],
 },
 ]);

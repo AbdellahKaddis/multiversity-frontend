@@ -1,97 +1,45 @@
 import { baseUrl } from "./authApi";
+import { apiFetch } from "../utils/apiClient";
 
 const universityApi = {
-    createUniversity:async({universityName, universityType, universityEmail, adminId}) => {
-            try{
-                const response = await fetch(`${baseUrl}universities`,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    name: universityName,
-                    email: universityEmail,
-                    type: universityType,
-                    adminId
-                })
-            })
+  createUniversity: async ({
+    universityName,
+    universityType,
+    universityEmail,
+    adminId,
+  }) =>
+    await apiFetch(`${baseUrl}universities`, {
+      method: "POST",
+      body: JSON.stringify({
+        name: universityName,
+        email: universityEmail,
+        type: universityType,
+        adminId,
+      }),
+    }),
 
-        const data = await response.json();
-                
-        return {data,status:response.status};
-            }catch(error){
-                if(error.message === "Failed to fetch")
-                throw new Error("Oops! We're having trouble connecting to the server. Please try again later.");
-            else
-                throw new Error(error.message)
-            }
-    },
-    getUniversity:async(universityId) => {
-            try{
-                const response = await fetch(`${baseUrl}universities/${universityId}`);
-                const data = await response.json();
+  getUniversity: async (universityId) =>
+    await apiFetch(`${baseUrl}universities/${universityId}`),
 
-                return {data,status:response.status};
-            }catch(error){
-                if(error.message === "Failed to fetch")
-                throw new Error("Oops! We're having trouble connecting to the server. Please try again later.");
-                else
-                throw new Error(error.message)
-            }
-    },
-    checkForDuplicateValues:async({name, email}) => {
-            try{
-                const response = await fetch(`${baseUrl}universities/${email}/${name}`,)
-                var data = null;
-                if(response.status !== 200)
-                    data = await response.json();
+  checkForDuplicateValues: async ({ name, email }) =>
+    await apiFetch(
+      `${baseUrl}universities/${encodeURIComponent(email)}/${encodeURIComponent(name)}`
+    ),
 
-                return {data,status:response.status};
-            }catch(error){
-                if(error.message === "Failed to fetch")
-                throw new Error("Oops! We're having trouble connecting to the server. Please try again later.");
-            else
-                throw new Error(error.message)
-            }
-    },
-    getUniversityByAdminId: async(adminId) => {
-        try{
-                const response = await fetch(`${baseUrl}admins/${adminId}/university`,)
-                const data = await response.json();
+  getUniversityByAdminId: async (adminId) =>
+    await apiFetch(`${baseUrl}admins/${adminId}/university`),
 
-                return {data,status:response.status};
-            }catch(error){
-                if(error.message === "Failed to fetch")
-                throw new Error("Oops! We're having trouble connecting to the server. Please try again later.");
-                else
-                throw new Error(error.message)
-            }
-    },getUniversities: async() => {
-        try{
-                const response = await fetch(`${baseUrl}universities`,)
-                const data = await response.json();
+  getUniversities: async () =>
+    await apiFetch(`${baseUrl}universities`),
 
-                return {data,status:response.status};
-            }catch(error){
-                if(error.message === "Failed to fetch")
-                throw new Error("Oops! We're having trouble connecting to the server. Please try again later.");
-                else
-                throw new Error(error.message)
-            }
-    },
-        getUniversityStatistics:async(universityId) => {
-            try{
-                const response = await fetch(`${baseUrl}universities/${universityId}/statistics`);
-                const data = await response.json();
+  updateUniversity: async (id, data) =>
+    await apiFetch(`${baseUrl}universities/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
 
-                return {data,status:response.status};
-            }catch(error){
-                if(error.message === "Failed to fetch")
-                throw new Error("Oops! We're having trouble connecting to the server. Please try again later.");
-                else
-                throw new Error(error.message)
-            }
-    },
+  getUniversityStatistics: async (universityId) =>
+    await apiFetch(`${baseUrl}universities/${universityId}/statistics`),
 };
+
 export default universityApi;

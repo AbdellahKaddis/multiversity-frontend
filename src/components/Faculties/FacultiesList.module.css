@@ -719,3 +719,87 @@
   background-color: #F2F3F4;
   color: #566573;
 }
+
+.courseMeta {
+  display: block;
+  font-size: 12px;
+  color: var(--text-muted, #7F8C8D);
+  margin-top: 2px;
+}
+
+.semesterBadge {
+  background: #EBF5FB;
+  color: #2471A3;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.hoursRow {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.hoursPill {
+  background: #F2F3F4;
+  color: #566573;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.notAssigned {
+  color: #B0BEC5;
+  font-style: italic;
+  font-size: 13px;
+}
+
+.countBadge {
+  background: #E8F8F5;
+  color: #16A085;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  display: inline-block;
+}
+
+/* Make the action Link look like a button */
+.actionButtons a.editButton {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+/* ---------- Loading state ---------- */
+.loadingState {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted, #7F8C8D);
+}
+
+.loadingState p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #ECEFF1;
+  border-top-color: var(--secondary, #16A085);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
